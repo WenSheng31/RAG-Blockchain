@@ -1,4 +1,5 @@
 Django==5.2.4
+gunicorn==23.0.0
 psycopg2-binary==2.9.10
 django-import-export==4.3.14
 python-dotenv==1.2.1
