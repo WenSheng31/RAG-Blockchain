@@ -6,6 +6,14 @@ services:
     volumes:
       - staticfiles:/app/staticfiles
       - hf_cache:/root/.cache/huggingface
+      - faiss_data:/app/faiss_data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     depends_on:
       db:
         condition: service_healthy
@@ -40,3 +48,4 @@ volumes:
   postgres_data:
   staticfiles:
   hf_cache:
+  faiss_data:
