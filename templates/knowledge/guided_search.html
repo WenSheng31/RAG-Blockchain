@@ -1,0 +1,97 @@
+{% extends "knowledge/base.html" %}
+{% load static %}
+{% block title %}引導式搜尋{% endblock %}
+{% block page_head %}
+<style>
+  .guided-step.active {
+    background-color: var(--c-accent);
+    color: var(--c-accent-fg);
+    border-color: transparent;
+  }
+  .guided-option.selected {
+    background-color: var(--c-accent);
+    color: var(--c-accent-fg);
+    border-color: transparent;
+  }
+  .guided-result-title  { font-size: 0.875rem; font-weight: 500; color: var(--c-text); }
+  .guided-result-meta   { font-size: 0.75rem; color: var(--c-muted); margin-top: 0.25rem; }
+  .guided-result-count  { font-size: 0.75rem; color: var(--c-muted); margin-top: 0.125rem; }
+  .guided-loading       { padding: 0.75rem; font-size: 0.875rem; color: var(--c-muted); }
+  .guided-empty         { grid-column: 1 / -1; padding: 2.5rem 0; font-size: 0.875rem; color: var(--c-muted); text-align: center; }
+</style>
+{% endblock %}
+{% block content %}
+  <div class="max-w-3xl mx-auto flex flex-col gap-5">
+
+    <!-- 頁面標頭 -->
+    <div>
+      <h2 class="m-0 mb-1 text-xl font-semibold">引導式搜尋</h2>
+      <p class="m-0 text-sm text-dim">透過幾個簡單問題，系統會協助你縮小範圍，找出可能相關的區塊鏈關鍵詞。</p>
+    </div>
+
+    <!-- 問答卡片 -->
+    <section class="bg-white border border-line rounded-xl p-5">
+
+      <!-- 步驟指示器 -->
+      <div class="flex items-center justify-center mb-6">
+        {% for step in guided_steps %}
+          <div class="w-9 h-9 rounded-md border border-line flex items-center justify-center text-sm font-medium guided-step transition-colors
+                      {% if forloop.first %}bg-mark text-mark-fg border-transparent{% else %}text-dim{% endif %}"
+               data-step-indicator="{{ step.step }}">{{ step.step }}</div>
+          {% if not forloop.last %}
+            <div class="w-12 border-t border-line mx-1"></div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <!-- 問題區 -->
+      {% for step in guided_steps %}
+        <section class="guided-question {% if forloop.first %}active{% endif %}"
+                 data-step="{{ step.step }}">
+          <h3 class="text-center text-base font-semibold mb-5">{{ step.question }}</h3>
+          <div class="guided-options grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {% for option in step.options %}
+              <button type="button"
+                      class="guided-option border border-line rounded-lg p-4 text-sm text-left cursor-pointer hover:bg-lift hover:border-line-dark transition-colors"
+                      data-field="{{ step.field }}"
+                      data-value="{{ option }}">{{ option }}</button>
+            {% endfor %}
+          </div>
+        </section>
+      {% endfor %}
+
+      <!-- 操作按鈕 -->
+      <div class="flex justify-center gap-3 mt-6 pt-5 border-t border-line">
+        <a href="{% url 'topic_list' %}"
+          class="px-4 py-2 rounded-md text-sm bg-primary text-white hover:bg-primary-dark transition-colors">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          回首頁
+        </a>
+        <button id="prev-step-btn"
+                type="button"
+                class="px-4 py-2 rounded-md border border-line text-sm hover:bg-lift transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled>上一步</button>
+        <button id="reset-guided-btn"
+                type="button"
+                class="px-4 py-2 rounded-md border border-line text-sm hover:bg-lift transition-colors">重新選擇</button>
+        
+      </div>
+    </section>
+
+    <!-- 結果區 -->
+    <div id="guided-result-area" class="hidden">
+      <section class="bg-white border border-line rounded-xl p-5">
+        <div class="mb-4">
+          <h3 class="m-0 mb-1 text-base font-semibold">推薦關鍵詞</h3>
+          <p id="guided-result-summary" class="m-0 text-sm text-dim"></p>
+        </div>
+        <div id="guided-result-list"
+             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      </section>
+    </div>
+
+  </div>
+{% endblock %}
+{% block extra_js %}
+  <script src="{% static 'js/guided_search.js' %}"></script>
+{% endblock %}

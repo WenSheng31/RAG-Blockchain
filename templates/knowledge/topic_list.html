@@ -1,0 +1,81 @@
+{% extends "knowledge/base.html" %}
+{% load static %}
+{% block title %}首頁{% endblock %}
+{% block content %}
+  <div class="max-w-7xl mx-auto flex flex-col gap-5">
+    <!-- Hero 主標題區塊 -->
+    <section class="bg-white border border-line rounded-xl p-6 md:p-8">
+      <div class="max-w-2xl">
+        <p class="mb-2 text-sm font-medium text-primary">
+          Blockchain Knowledge Navigation
+        </p>
+        <h1 class="m-0 mb-3 text-lg md:text-4xl font-bold tracking-wide text-ink">
+          區塊鏈知識智慧導航系統
+        </h1>
+        <p class="m-0 text-sm md:text-base leading-relaxed text-dim">
+          快速查找區塊鏈技術、密碼學與生態概念，提供系統化的關鍵字導引。
+        </p>
+      </div>
+    </section>
+
+    <!-- 快速搜尋 -->
+    <section class="bg-white border border-line rounded-xl p-5">
+      <div class="flex items-start gap-4 mb-4">
+        <i data-lucide="search" class="w-4 h-4 shrink-0 mt-1 text-dim"></i>
+        <div>
+          <h2 class="m-0 mb-1 text-base font-semibold">快速搜尋</h2>
+          <p class="m-0 text-sm text-dim">輸入關鍵字前幾個字，系統自動提供相關詞彙建議。</p>
+        </div>
+      </div>
+      <input type="text"
+             id="keyword-search"
+             class="w-full px-3 py-2 text-sm border border-line rounded-md focus:outline-none focus:border-line-dark transition-colors"
+             placeholder="例如：錢包、共識、NFT、以太坊"
+             autocomplete="off" />
+      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" />
+      <div id="search-results" class="mt-2 max-h-64 overflow-y-auto rounded-md border border-line"></div>
+    </section>
+
+    <!-- 引導搜尋入口 -->
+    <section class="bg-white border border-line rounded-xl p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-6">
+      <div class="flex items-center gap-4">
+        <div class="w-11 h-11 shrink-0 flex items-center justify-center rounded-lg bg-surface border border-line">
+          <i data-lucide="compass" class="w-5 h-5 text-dim"></i>
+        </div>
+        <div>
+          <p class="m-0 mb-1 text-xs font-medium text-primary tracking-wide">Guided Search</p>
+          <h5 class="m-0 mb-1 text-sm font-semibold">不知道怎麼開始？</h5>
+          <p class="m-0 text-sm text-dim">透過3個簡單問題，讓系統協助你縮小範圍，精準推薦您需要的關鍵字。</p>
+        </div>
+      </div>
+      <a href="{% url 'guided_search' %}"
+         class="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg
+          bg-primary text-white text-sm font-medium shadow-sm
+          hover:bg-primary-dark hover:shadow-md transition-all">
+        開始引導搜尋
+      </a>
+    </section>
+
+    <!-- 主題卡片 -->
+    <section>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {% for group in groups %}
+          <div class="bg-white border border-line rounded-xl p-4 flex flex-col">
+            <div class="flex-1 mb-4">
+              <h5 class="m-0 mb-2 text-base font-semibold leading-snug text-ink">{{ group.name }}</h5>
+              <p class="m-0 text-sm md:text-[15px] leading-6 text-dim text-justify">{{ group.description|linebreaksbr|default:"尚無描述" }}</p>
+            </div>
+            <a href="{% url 'topic_to_keyword_list' group.id %}"
+               class="px-4 py-2 rounded-md border border-line text-sm flex items-center justify-center gap-1 hover:bg-lift hover:border-line-dark transition-colors">
+              查看關鍵字 <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+  </div>
+{% endblock %}
+{% block extra_js %}
+  <script src="{% static 'js/keyword_search.js' %}"></script>
+{% endblock %}

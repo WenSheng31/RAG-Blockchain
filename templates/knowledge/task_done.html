@@ -1,0 +1,35 @@
+{% extends "knowledge/base.html" %}
+{% load static %}
+{% block title %}任務完成{% endblock %}
+{% block content %}
+  <div class="flex items-start justify-center pt-16">
+    <div class="max-w-xl w-full bg-white border border-line rounded-xl p-12 text-center">
+
+      <h2 class="m-0 mb-4 text-xl font-semibold">任務已完成</h2>
+      <p class="mb-2 text-sm">感謝你的參與！你已完成本次所有搜尋任務。</p>
+      <p class="m-0 text-sm text-dim">你的操作過程與作答結果已成功記錄，將僅用於學術研究分析。</p>
+
+      <hr class="my-6 border-line">
+
+      <h5 class="mb-2 text-base font-semibold">研究問卷</h5>
+      <p class="mb-4 text-sm text-dim">請點擊下方連結完成問卷（約 3-5 分鐘）。</p>
+      <a href="https://forms.gle/s9iqAMdtBSEJdAkRA"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="inline-block px-5 py-2 rounded-md border border-line-dark text-sm font-medium hover:bg-lift transition-colors">
+        前往填寫問卷
+      </a>
+
+      <hr class="my-6 border-line">
+
+      <p class="mb-5 text-sm text-dim">請通知研究人員，或依指示結束本次實驗。</p>
+      <div class="flex items-center justify-center gap-3">
+        <a href="{% url 'restart_task' %}"
+           class="px-4 py-2 rounded-md border border-line text-sm hover:bg-lift transition-colors">重新開始實驗</a>
+        <a href="{% url 'topic_list' %}"
+           class="px-4 py-2 rounded-md border border-line-dark text-sm font-medium hover:bg-lift transition-colors">返回系統首頁</a>
+      </div>
+
+    </div>
+  </div>
+{% endblock %}

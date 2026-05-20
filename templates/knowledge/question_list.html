@@ -1,0 +1,307 @@
+{% extends "knowledge/base.html" %}
+{% load static %}
+{% block title %}{{ keyword.keyword }} — 關鍵字詳情{% endblock %}
+{% block content %}
+  <div class="max-w-7xl mx-auto flex flex-col gap-5">
+
+    <!-- 麵包屑 -->
+    <nav class="flex flex-wrap items-center gap-2 text-sm text-dim">
+      <a href="{% url 'topic_list' %}" class="hover:text-ink transition-colors">{{ group.name }}</a>
+      <i data-lucide="chevron-right" class="w-3 h-3"></i>
+      <a href="{% url 'keyword_list' group.id category.id %}" class="hover:text-ink transition-colors">{{ category.name }}</a>
+      <i data-lucide="chevron-right" class="w-3 h-3"></i>
+      <span class="text-ink">{{ keyword.keyword }}</span>
+    </nav>
+
+    <!-- 頁面標頭 -->
+    <div class="flex items-center gap-3">
+      <a href="{% url 'keyword_list' group.id category.id %}"
+         class="px-3 py-1.5 rounded-md border border-line text-sm flex items-center gap-2 shrink-0 bg-primary-light text-white transition-colors">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> 回分類
+      </a>
+      <h2 class="flex-1 min-w-0 m-0 text-xl font-semibold truncate">{{ keyword.keyword }}</h2>
+      <a href="{% url 'topic_list' %}"
+         class="shrink-0 w-9 h-9 rounded-md border border-line flex items-center justify-center hover:bg-lift transition-colors">
+        <i data-lucide="house" class="w-4 h-4 text-dim"></i>
+      </a>
+    </div>
+
+    <!-- AI 摘要 -->
+    <section class="bg-[#FCFAF2] border border-line rounded-xl">
+      <div class="flex items-center gap-3 px-5 py-4 border-b border-line-dark bg-[#DCEAF0]">
+        <i data-lucide="sparkles" class="w-4 h-4 text-dim"></i>
+        <h3 class="m-0 text-base font-semibold">AI 摘要</h3>
+      </div>
+      <div class="flex flex-col gap-3 p-5">
+        <div id="ai-summary-text" class="text-sm text-dim">
+          點擊按鈕，生成與「{{ keyword.keyword }}」相關的 AI 摘要。
+        </div>
+        <div id="ai-summary-sources" class="text-sm text-dim"></div>
+        <div>
+          <button id="generate-summary-btn"
+                  class="px-4 py-2 rounded-md border border-line-dark text-sm font-medium hover:bg-lift transition-colors"
+                  onclick="fetchSummary('{{ keyword.keyword|escapejs }}')">
+            <i data-lucide="wand-2" class="w-4 h-4"></i> 生成 AI 摘要
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 介紹文章 -->
+    <section class="bg-[#FCFAF2] border border-line rounded-xl">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-line-dark bg-[#DCEAF0]">
+        <div class="flex items-center gap-3">
+          <i data-lucide="book-open" class="w-4 h-4 text-dim"></i>
+          <h3 class="m-0 text-base font-semibold">介紹文章</h3>
+        </div>
+        <span class="text-xs text-dim">{{ article_total_count }} 篇</span>
+      </div>
+      <div class="p-4">
+        {% if group_tree %}
+          <div class="flex flex-col gap-2">
+            {% for node in group_tree %}
+              {% with main=node.main %}
+                <details class="acc-l1 border border-line rounded-lg overflow-hidden">
+                  <summary class="flex items-center gap-3 px-4 py-3 cursor-pointer list-none border-b border-line bg-surface hover:bg-lift transition-colors [&::marker]:hidden">
+                    <span class="flex-1 text-sm font-medium">{{ main.name }}</span>
+                    <span class="text-xs px-2 py-0.5 rounded-md bg-white border border-line text-dim">{{ node.count }}</span>
+                  </summary>
+                  <div class="p-3 flex flex-col gap-2">
+                    {% for subnode in node.subs %}
+                      {% with sub=subnode.sub %}
+                        {% if sub %}
+                          <details class="acc-l2 border border-line rounded-lg overflow-hidden">
+                            <summary class="flex items-center gap-3 px-4 py-2.5 cursor-pointer list-none border-b border-line bg-surface hover:bg-lift transition-colors [&::marker]:hidden">
+                              <span class="flex-1 text-sm">{{ sub.name }}</span>
+                              <span class="text-xs px-2 py-0.5 rounded-md bg-white border border-line text-dim">{{ subnode.count }}</span>
+                            </summary>
+                            <div class="p-3 flex flex-col gap-2">
+                              {% for thirdnode in subnode.thirds %}
+                                {% with third=thirdnode.third pages=thirdnode.pages %}
+                                  {% if third %}
+                                    <div class="flex items-center gap-2 px-3 py-2 rounded-md bg-surface border border-line text-sm">
+                                      <span class="flex-1 text-dim">{{ third.name }}</span>
+                                      <span class="text-xs text-dim">{{ thirdnode.count }}</span>
+                                    </div>
+                                  {% endif %}
+                                  {% for page in pages %}
+                                    <details class="acc-article border border-line rounded-lg overflow-hidden"
+                                             data-page-id="{{ page.id }}"
+                                             ontoggle="loadArticleContent(this)">
+                                      <summary class="flex items-center gap-2 px-4 py-2.5 cursor-pointer list-none hover:bg-lift transition-colors [&::marker]:hidden">
+                                        <i data-lucide="file-text" class="w-3 h-3 text-dim shrink-0"></i>
+                                        <span class="flex-1 text-sm">{{ page.title }}</span>
+                                        <i data-lucide="chevron-down" class="w-3 h-3 text-dim shrink-0"></i>
+                                      </summary>
+                                      <div class="p-3 flex flex-col gap-3 border-t border-line">
+                                        <div class="rounded-md bg-surface border border-line p-3 text-sm">
+                                          <div class="flex gap-2 mb-1.5">
+                                            <span class="w-16 shrink-0 text-dim">標題</span>
+                                            <span>{{ page.title }}</span>
+                                          </div>
+                                          <div class="flex gap-2">
+                                            <span class="w-16 shrink-0 text-dim">群組</span>
+                                            <span>{{ main.name }} / {{ sub.name }}{% if third %} / {{ third.name }}{% endif %}</span>
+                                          </div>
+                                        </div>
+                                        <div class="article-content-wrap max-h-[560px] overflow-y-auto overflow-x-auto rounded-md border border-line">
+                                          <div class="p-4 website-html-content prose prose-slate prose-sm max-w-none"></div>
+                                        </div>
+                                        <div class="flex flex-wrap items-center gap-1.5 text-sm">
+                                          <span class="text-dim">相關關鍵字：</span>
+                                          {% for kw in page.keywords.all %}
+                                            <a href="{% url 'question_list' kw.id %}"
+                                               class="px-2 py-0.5 rounded-md border border-line text-xs hover:bg-lift transition-colors">{{ kw.keyword }}</a>
+                                          {% endfor %}
+                                        </div>
+                                      </div>
+                                    </details>
+                                  {% endfor %}
+                                {% endwith %}
+                              {% endfor %}
+                            </div>
+                          </details>
+                        {% else %}
+                          {% for thirdnode in subnode.thirds %}
+                            {% with third=thirdnode.third pages=thirdnode.pages %}
+                              {% if third %}
+                                <div class="flex items-center gap-2 px-3 py-2 rounded-md bg-surface border border-line text-sm">
+                                  <span class="flex-1 text-dim">{{ third.name }}</span>
+                                  <span class="text-xs text-dim">{{ thirdnode.count }}</span>
+                                </div>
+                              {% endif %}
+                              {% for page in pages %}
+                                <details class="acc-article border border-line rounded-lg overflow-hidden"
+                                         data-page-id="{{ page.id }}"
+                                         ontoggle="loadArticleContent(this)">
+                                  <summary class="flex items-center gap-2 px-4 py-2.5 cursor-pointer list-none hover:bg-lift transition-colors [&::marker]:hidden">
+                                    <i data-lucide="file-text" class="w-3 h-3 text-dim shrink-0"></i>
+                                    <span class="flex-1 text-sm">{{ page.title }}</span>
+                                    <i data-lucide="chevron-down" class="w-3 h-3 text-dim shrink-0"></i>
+                                  </summary>
+                                  <div class="p-3 flex flex-col gap-3 border-t border-line">
+                                    <div class="rounded-md bg-surface border border-line p-3 text-sm">
+                                      <div class="flex gap-2 mb-1.5">
+                                        <span class="w-16 shrink-0 text-dim">標題</span>
+                                        <span>{{ page.title }}</span>
+                                      </div>
+                                      <div class="flex gap-2">
+                                        <span class="w-16 shrink-0 text-dim">群組</span>
+                                        <span>{{ main.name }}{% if third %} / {{ third.name }}{% endif %}</span>
+                                      </div>
+                                    </div>
+                                    <div class="article-content-wrap max-h-[560px] overflow-y-auto overflow-x-auto rounded-md border border-line">
+                                      <div class="p-4 website-html-content prose prose-slate prose-sm max-w-none"></div>
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-1.5 text-sm">
+                                      <span class="text-dim">相關關鍵字：</span>
+                                      {% for kw in page.keywords.all %}
+                                        <a href="{% url 'question_list' kw.id %}"
+                                           class="px-2 py-0.5 rounded-md border border-line text-xs hover:bg-lift transition-colors">{{ kw.keyword }}</a>
+                                      {% endfor %}
+                                    </div>
+                                  </div>
+                                </details>
+                              {% endfor %}
+                            {% endwith %}
+                          {% endfor %}
+                        {% endif %}
+                      {% endwith %}
+                    {% endfor %}
+                  </div>
+                </details>
+              {% endwith %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-center py-6 text-sm text-dim">目前沒有相關介紹文章。</p>
+        {% endif %}
+
+        {% if ungrouped_pages %}
+          <div class="mt-3">
+            <div class="mb-2 px-1 text-xs text-dim">未分類</div>
+            <div class="flex flex-col gap-2">
+              {% for page in ungrouped_pages %}
+                <details class="acc-article border border-line rounded-lg overflow-hidden"
+                         data-page-id="{{ page.id }}"
+                         ontoggle="loadArticleContent(this)">
+                  <summary class="flex items-center gap-2 px-4 py-2.5 cursor-pointer list-none hover:bg-lift transition-colors [&::marker]:hidden">
+                    <i data-lucide="file-text" class="w-3 h-3 text-dim shrink-0"></i>
+                    <span class="flex-1 text-sm">{{ page.title }}</span>
+                    <i data-lucide="chevron-down" class="w-3 h-3 text-dim shrink-0"></i>
+                  </summary>
+                  <div class="p-3 flex flex-col gap-3 border-t border-line">
+                    <div class="rounded-md bg-surface border border-line p-3 text-sm">
+                      <div class="flex gap-2">
+                        <span class="w-16 shrink-0 text-dim">標題</span>
+                        <span>{{ page.title }}</span>
+                      </div>
+                    </div>
+                    <div class="article-content-wrap max-h-[560px] overflow-y-auto overflow-x-auto rounded-md border border-line">
+                      <div class="p-4 website-html-content prose prose-slate prose-sm max-w-none"></div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5 text-sm">
+                      <span class="text-dim">相關關鍵字：</span>
+                      {% for kw in page.keywords.all %}
+                        <a href="{% url 'question_list' kw.id %}"
+                           class="px-2 py-0.5 rounded-md border border-line text-xs hover:bg-lift transition-colors">{{ kw.keyword }}</a>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </details>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- 問答集 -->
+    <section class="bg-[#FCFAF2] border border-line rounded-xl">
+      <div class="flex items-center gap-3 px-5 py-4 border-b border-line-dark bg-[#DCEAF0]">
+        <i data-lucide="message-square" class="w-4 h-4 text-dim"></i>
+        <h3 class="m-0 text-base font-semibold">問答集</h3>
+      </div>
+      <div class="p-5 flex flex-col gap-3">
+        {% if questions %}
+          {% for q in questions %}
+            <div class="border border-line rounded-lg p-4 flex flex-col gap-3">
+              <div class="flex gap-3 items-start">
+                <span class="shrink-0 w-7 h-7 rounded-md bg-mark text-mark-fg text-xs flex items-center justify-center font-medium">問</span>
+                <p class="m-0 flex-1 text-sm">{{ q.question }}</p>
+              </div>
+              <div class="flex gap-3 items-start">
+                <span class="shrink-0 w-7 h-7 rounded-md bg-surface border border-line text-xs flex items-center justify-center font-medium text-dim">答</span>
+                <p class="m-0 flex-1 text-sm">{{ q.answer }}</p>
+              </div>
+              {% if q.keywords.all %}
+                <div class="flex flex-wrap items-center gap-1.5 pt-3 border-t border-line">
+                  <span class="text-xs text-dim">相關關鍵字：</span>
+                  {% for k in q.keywords.all %}
+                    <a href="{% url 'question_list' k.id %}"
+                       class="px-2 py-0.5 rounded-md border border-line text-xs transition-colors bg-[#2E5C6E] text-white">{{ k.keyword }}</a>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-center py-6 text-sm text-dim">尚無相關問答。</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- 完成本題（測驗中） -->
+    {% if request.session.task_active %}
+      <section class="bg-white border border-line rounded-xl p-6 text-center">
+        <p class="mb-4 text-sm text-dim">若你已確認「{{ keyword.keyword }}」即為本題所需的關鍵詞，請點選下方按鈕完成本題。</p>
+        <a href="{% url 'finish_task' keyword.id %}"
+           class="inline-block px-6 py-2 rounded-md border border-line-dark text-sm font-medium hover:bg-lift transition-colors">
+          我選這個關鍵詞
+        </a>
+      </section>
+    {% endif %}
+
+  </div>
+
+  <!-- AI 來源全文 Modal -->
+  <div id="source-modal" class="hidden fixed inset-0 z-[9500] flex items-center justify-center p-5">
+    <div class="absolute inset-0 bg-black/40" onclick="closeSourceModal()"></div>
+    <div class="relative w-full max-w-[820px] max-h-[85vh] flex flex-col overflow-hidden bg-white border border-line rounded-xl shadow-xl">
+      <div class="shrink-0 flex items-center justify-between gap-3 px-5 py-4 border-b border-line">
+        <h5 id="sourceModalTitle" class="m-0 flex-1 min-w-0 text-base font-semibold"></h5>
+        <button type="button" onclick="closeSourceModal()"
+                class="shrink-0 w-8 h-8 rounded-md border border-line flex items-center justify-center hover:bg-lift transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="sourceModalBody" class="flex-1 overflow-y-auto p-6 text-sm"></div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/ai_summary.js' %}"></script>
+  <script>
+function loadArticleContent(details) {
+  if (!details.open) return;
+  if (details.dataset.loaded) return;
+
+  const pageId = details.dataset.pageId;
+  const contentEl = details.querySelector('.website-html-content');
+
+  contentEl.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"></span>';
+
+  fetch(`/api/page/${pageId}/`)
+    .then(r => r.json())
+    .then(data => {
+      contentEl.innerHTML = marked.parse(data.content || "");
+      details.dataset.loaded = '1';
+    })
+    .catch(() => {
+      contentEl.innerHTML = '（載入失敗）';
+    });
+}
+  </script>
+{% endblock %}

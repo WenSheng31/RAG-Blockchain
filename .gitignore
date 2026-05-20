@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+
+# Django
+*.log
+local_settings.py
+staticfiles/
+media/
+
+# Environment
+.env
+
+# Database
+*.sqlite3
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# FAISS index 由本機建立後部署，不忽略
+# faiss_data/
+
+# Gunicorn runtime
+gunicorn.pid

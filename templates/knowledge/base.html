@@ -1,0 +1,171 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-Hant" class="h-full">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}區塊鏈關鍵字查詢系統{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              surface:     '#EAF4F7', //背景
+              line:        '#C9DDE5', //邊框
+              'line-dark': '#5C7A86', //深邊框
+              ink:         '#2B3A42', //主文字
+              dim:         '#6B8793', //文字
+              lift:        '#CFE3E8', //hover
+              primary:     '#2B5F75',
+              'primary-light': '#4F8896',
+              'primary-dark': '#244B54',
+              mark: {
+                DEFAULT: '#0f172a', //強調色
+                fg:      '#ffffff',
+              },
+            },
+            fontFamily: {
+              sans: ['"Noto Sans TC"', 'system-ui', 'sans-serif'],
+            },
+          }
+        }
+      };
+    </script>
+    <style>
+      :root {
+        --c-surface:     #EAF4F7;
+        --c-border:      #C9DDE5;
+        --c-border-dark: #5C7A86;
+        --c-text:        #2B3A42;
+        --c-muted:       #6B8793;
+        --c-accent:      #5F9EA0;
+        --c-accent-fg:   #ffffff;
+        --c-hover:       #b7e6eb;
+      }
+
+      /* JS-controlled states */
+      #abort-modal.hidden        { display: none; }
+      #source-modal.hidden       { display: none; }
+      .guided-question           { display: none; }
+      .guided-question.active    { display: block; }
+      #guided-result-area.hidden { display: none; }
+      #task-float-panel.collapsed #task-panel-body { display: none; }
+      #sidebar                   { display: flex; }
+      #sidebar.hidden            { display: none; }
+      #search-results:empty      { display: none; }
+      svg.lucide                 { display: inline; vertical-align: -0.125em; }
+    </style>
+    {% block page_head %}{% endblock %}
+  </head>
+
+  <body class="h-full overflow-hidden font-sans text-ink bg-white">
+
+    <!-- ===== Sidebar backdrop (mobile) ===== -->
+    <div id="sidebar-backdrop"
+         class="hidden fixed inset-0 z-10 bg-black/30"
+         onclick="toggleSidebar()"></div>
+
+    <!-- ===== Sidebar ===== -->
+    <aside id="sidebar"
+           class="fixed inset-y-0 left-0 z-20 flex-col w-56 bg-[#FCFAF2] border-r border-line">
+
+      <!-- Sidebar Header -->
+      <div class="shrink-0 h-16 flex items-center p-4 border-b border-line-dark">
+        <span class="font-semibold text-md">功能選單</span>
+      </div>
+
+      <!-- Nav -->
+      <nav class="flex flex-col gap-1 p-3">
+        <a href="{% url 'topic_list' %}"
+           class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors
+                  {% if request.resolver_match.url_name == 'topic_list' %}bg-mark text-mark-fg{% else %}text-ink hover:bg-lift{% endif %}">
+          <i data-lucide="house" class="w-4 h-4 shrink-0"></i>
+          <span>首頁</span>
+        </a>
+
+        {% if request.session.task_active %}
+        <button type="button"
+                class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-left w-full transition-colors text-[#9F353A] hover:bg-[#FBE9EA]"
+                onclick="confirmAbortTask()">
+          <i data-lucide="circle-x" class="w-4 h-4 shrink-0"></i>
+          <span>中斷測驗</span>
+        </button>
+        {% else %}
+        <a href="{% url 'task_view' %}"
+           class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors
+                  {% if request.resolver_match.url_name == 'task_view' %}bg-mark text-mark-fg{% else %}text-ink hover:bg-lift{% endif %}">
+          <i data-lucide="circle-play" class="w-4 h-4 shrink-0"></i>
+          <span>進入測驗</span>
+        </a>
+        {% endif %}
+      </nav>
+
+        <div class="flex-1"></div>
+
+        <div class="p-2 border-t border-line-dark">
+          <a href="{% url 'admin:login' %}"
+          target="_blank"
+          rel="noopener noreferrer"  
+          class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors
+                    {% if request.resolver_match.url_name == 'admin:login' %}bg-mark text-mark-fg{% else %}text-ink hover:bg-lift{% endif %}">
+            <i data-lucide="log-in" class="w-4 h-4 shrink-0"></i>
+            <span>後台管理</span>
+          </a>
+        </div>
+    </aside>
+
+    <!-- ===== Main（Header + Content）===== -->
+    <div id="main-wrapper" class="h-full flex flex-col overflow-hidden">
+
+      <header class="shrink-0 h-16 flex items-center justify-between px-4 border-b border-line bg-primary text-white">
+        <div class="flex items-center gap-3">
+          <button type="button" onclick="toggleSidebar()"
+                  class="w-9 h-9 flex items-center justify-center rounded-md border border-line bg-surface hover:bg-lift transition-colors shrink-0">
+            <i data-lucide="panel-left" class="w-5 h-5 text-ink"></i>
+          </button>
+          <span class="font-semibold text-md">區塊鏈關鍵字查詢系統</span>
+        </div>
+        <div class="text-sm">{% block header_right %}{% endblock %}</div>
+      </header>
+
+      <main class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-6 bg-surface">
+        {% block content %}{% endblock %}
+      </main>
+
+    </div>
+
+    <!-- ===== 浮動任務面板 ===== -->
+    {% if request.session.task_active %}
+      {% include "knowledge/_task_panel.html" %}
+    {% endif %}
+
+    <!-- ===== 中斷測驗 Modal ===== -->
+    <div id="abort-modal" class="hidden fixed inset-0 z-[10000] flex items-center justify-center">
+      <div class="absolute inset-0 bg-black/40" onclick="closeAbortModal()"></div>
+      <div class="relative max-w-sm w-11/12 p-8 text-center bg-white rounded-xl border border-line shadow-xl">
+        <h3 class="mb-3 font-semibold text-lg text-[#9F353A]">測驗已中斷</h3>
+        <p class="mb-6 text-sm text-dim">
+          您已中斷本次測驗。<br>
+          本次作答內容 <strong class="text-[#9F353A]">不會被儲存</strong>。
+        </p>
+        <div class="flex justify-center">
+          <button type="button" onclick="goHome()"
+                  class="px-5 py-2 rounded-md border border-line-dark text-sm font-medium hover:bg-lift transition-colors">
+            返回首頁
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="{% static 'js/task_panel.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    {% block extra_js %}{% endblock %}
+    <script>lucide.createIcons();</script>
+
+  </body>
+</html>

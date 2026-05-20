@@ -1,0 +1,21 @@
+{% extends "knowledge/base.html" %}
+{% load static %}
+{% block title %}實驗任務{% endblock %}
+{% block content %}
+  <div class="h-full flex items-center justify-center">
+    <div class="max-w-lg w-full bg-white border border-line rounded-xl shadow-sm p-12 text-center">
+      <span class="inline-block text-xs px-2 py-0.5 rounded-md bg-surface border border-line text-dim mb-4">
+        任務 {{ task_number }} / {{ total_tasks }}
+      </span>
+      <h2 class="m-0 mb-4 text-xl font-semibold">本題任務</h2>
+      <p class="mb-8 text-sm">{{ task.description }}</p>
+      <form method="post" action="{% url 'start_task' %}">
+        {% csrf_token %}
+        <button type="submit"
+                class="px-6 py-2 rounded-md border border-line-dark text-sm font-medium hover:bg-lift transition-colors">
+          開始搜尋
+        </button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
