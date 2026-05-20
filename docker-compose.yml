@@ -1,0 +1,42 @@
+services:
+  web:
+    build: .
+    restart: always
+    env_file: .env
+    volumes:
+      - staticfiles:/app/staticfiles
+      - hf_cache:/root/.cache/huggingface
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME:-ragblockchain}
+      POSTGRES_USER: ${DB_USER:-raguser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-raguser}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - staticfiles:/app/staticfiles:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
+  staticfiles:
+  hf_cache:

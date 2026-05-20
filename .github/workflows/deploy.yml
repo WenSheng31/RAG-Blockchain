@@ -12,17 +12,6 @@ jobs:
         working-directory: /home/evolab/RAG-Blockchain
         run: git pull origin main
 
-      - name: Install dependencies
+      - name: Deploy with Docker Compose
         working-directory: /home/evolab/RAG-Blockchain
-        run: .venv/bin/pip install -r requirements.txt
-
-      - name: Run migrations
-        working-directory: /home/evolab/RAG-Blockchain
-        run: .venv/bin/python manage.py migrate --noinput
-
-      - name: Collect static files
-        working-directory: /home/evolab/RAG-Blockchain
-        run: .venv/bin/python manage.py collectstatic --noinput
-
-      - name: Restart service
-        run: sudo systemctl restart ragblockchain
+        run: docker compose up --build -d
