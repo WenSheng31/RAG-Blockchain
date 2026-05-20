@@ -12,6 +12,21 @@ jobs:
         working-directory: /home/evolab/RAG-Blockchain
         run: git pull origin main
 
+      - name: Create .env
+        working-directory: /home/evolab/RAG-Blockchain
+        run: |
+          cat > .env << EOF
+          DEBUG=False
+          DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+          GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
+          DB_NAME=ragblockchain
+          DB_USER=raguser
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_HOST=db
+          DB_PORT=5432
+          ALLOWED_HOSTS=bowl.evo-techlab.com
+          EOF
+
       - name: Deploy with Docker Compose
         working-directory: /home/evolab/RAG-Blockchain
         run: docker compose up --build -d
