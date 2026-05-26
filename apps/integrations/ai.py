@@ -32,7 +32,7 @@ class RAGService:
         index = faiss.read_index(str(INDEX_PATH))
         ids = np.load(str(IDS_PATH))
         embedder = SentenceTransformer("BAAI/bge-m3")
-        genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+        genai.configure(api_key=os.environ["GOOGLE_API_KEY"], transport="rest")
         model = genai.GenerativeModel("gemini-2.5-flash")
         logger.info("RAGService loaded (%d vectors).", index.ntotal)
         return cls(index, ids, embedder, model)
@@ -53,7 +53,7 @@ class RAGService:
             import google.generativeai as genai
             resp = self._model.generate_content(prompt, request_options={"timeout": 60})
             return (resp.text or "").strip() or "AI 摘要生成失敗：回傳為空。"
-        except Exception as exc:
+        except BaseException as exc:
             logger.error("Gemini failed for '%s': %s", keyword, exc)
             return f"AI 摘要生成失敗：{exc}"
 
