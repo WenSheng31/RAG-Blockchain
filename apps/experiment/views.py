@@ -55,7 +55,8 @@ def finish_task(request, keyword_id):
     tot_seconds = (end_time - start_time).total_seconds() if start_time else None
 
     try:
-        selected_text = KW.objects.values_list("keyword", flat=True).get(pk=keyword_id)
+        kw_row = KW.objects.values("keyword", "keyword_en").get(pk=keyword_id)
+        selected_text = kw_row["keyword_en"] or kw_row["keyword"]
     except KW.DoesNotExist:
         selected_text = ""
 

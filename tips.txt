@@ -1,1 +1,8 @@
 uv run manage.py runserver
+
+uv run manage.py build_faiss_index #重建索引
+
+git status
+git add .
+git commit -m "更新網站內容"
+git push origin main
