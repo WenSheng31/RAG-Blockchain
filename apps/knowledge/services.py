@@ -11,6 +11,7 @@ from .guided_search_config import (
     get_guided_result_message,
     get_step2_options,
 )
+from .learning_path_config import LEARNING_PATH_TOPICS
 
 logger = logging.getLogger(__name__)
 
@@ -197,6 +198,30 @@ def get_or_generate_summary(keyword: str, force: bool = False) -> dict:
     )
 
     return {"keyword": keyword, "summary": summary, "sources": sources}
+
+
+# ── Learning Path ─────────────────────────────────────────────────────────────
+
+def get_learning_path_data() -> list:
+    result = []
+    for topic in LEARNING_PATH_TOPICS:
+        keywords = list(
+            Keyword.objects
+            .filter(id__in=topic["keyword_ids"])
+            .annotate(article_count=Count("articles", distinct=True))
+            .order_by("keyword")
+        )
+        kw_data = [
+            {
+                "id": kw.id,
+                "keyword": kw.keyword,
+                "keyword_en": kw.keyword_en,
+                "article_count": kw.article_count,
+            }
+            for kw in keywords
+        ]
+        result.append({**topic, "keywords": kw_data})
+    return result
 
 
 # ── Guided Search ─────────────────────────────────────────────────────────────

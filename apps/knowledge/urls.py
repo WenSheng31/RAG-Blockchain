@@ -10,6 +10,7 @@ urlpatterns = [
     path("api/keyword-summary/", views.get_keyword_summary, name="get_keyword_summary"),
     path("api/page/<int:pk>/", views.gitbookpage_json, name="gitbookpage_json"),
     path("api/keyword-autocomplete/", views.keyword_autocomplete, name="keyword_autocomplete"),
+    path("learning-path/", views.learning_path, name="learning_path"),
     path("guided-search/", views.guided_search, name="guided_search"),
     path("api/guided-search/", views.guided_search_api, name="guided_search_api"),
     path("api/guided-step2-options/", views.guided_step2_options_api, name="guided_step2_options_api"),

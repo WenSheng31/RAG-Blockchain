@@ -51,6 +51,10 @@
       /* JS-controlled states */
       #abort-modal.hidden        { display: none; }
       #source-modal.hidden       { display: none; }
+      #guided-modal.hidden       { display: none; }
+      #onboarding-modal.hidden   { display: none; }
+      #ob-step-1.hidden, #ob-step-2.hidden { display: none; }
+      #task-intro-modal.hidden { display: none; }
       .guided-question           { display: none; }
       .guided-question.active    { display: block; }
       #guided-result-area.hidden { display: none; }
@@ -88,6 +92,13 @@
           <span>首頁</span>
         </a>
 
+        <a href="{% url 'learning_path' %}"
+           class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors
+                  {% if request.resolver_match.url_name == 'learning_path' %}bg-mark text-mark-fg{% else %}text-ink hover:bg-lift{% endif %}">
+          <i data-lucide="map" class="w-4 h-4 shrink-0"></i>
+          <span>新手入口</span>
+        </a>
+
         {% if request.session.task_active %}
         <button type="button"
                 class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-left w-full transition-colors text-[#9F353A] hover:bg-[#FBE9EA]"
@@ -107,16 +118,6 @@
 
         <div class="flex-1"></div>
 
-        <div class="p-2 border-t border-line-dark">
-          <a href="{% url 'admin:login' %}"
-          target="_blank"
-          rel="noopener noreferrer"  
-          class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors
-                    {% if request.resolver_match.url_name == 'admin:login' %}bg-mark text-mark-fg{% else %}text-ink hover:bg-lift{% endif %}">
-            <i data-lucide="log-in" class="w-4 h-4 shrink-0"></i>
-            <span>後台管理</span>
-          </a>
-        </div>
     </aside>
 
     <!-- ===== Main（Header + Content）===== -->

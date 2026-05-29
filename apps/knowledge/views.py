@@ -17,6 +17,7 @@ from .services import (
     get_guided_search_results,
     get_keyword,
     get_keywords,
+    get_learning_path_data,
     get_or_generate_summary,
     get_page,
     get_pages,
@@ -29,7 +30,10 @@ logger = logging.getLogger(__name__)
 
 def topic_list(request):
     request._nav_page_name = "主題列表"
-    return render(request, "knowledge/topic_list.html", {"groups": get_all_groups()})
+    return render(request, "knowledge/topic_list.html", {
+        "groups": get_all_groups(),
+        "guided_steps": GUIDED_SEARCH_STEPS,
+    })
 
 
 def topic_to_keyword_list(request, group_id):
@@ -108,6 +112,12 @@ def keyword_autocomplete(request):
         for kw in get_autocomplete_keywords(q)
     ]
     return JsonResponse({"results": results})
+
+
+def learning_path(request):
+    return render(request, "knowledge/learning_path.html", {
+        "topics": get_learning_path_data(),
+    })
 
 
 def guided_search(request):

@@ -2,6 +2,100 @@
 {% load static %}
 {% block title %}實驗任務{% endblock %}
 {% block content %}
+
+  {% if task_number == 1 %}
+  <!-- 正式測驗說明 Modal（僅第一題出現） -->
+  <div id="task-intro-modal" class="hidden fixed inset-0 z-[9700] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50"></div>
+    <div class="relative w-full max-w-2xl max-h-[92vh] flex flex-col bg-white border border-line rounded-xl shadow-xl overflow-hidden">
+
+      <!-- Header -->
+      <div class="shrink-0 flex items-center gap-4 px-6 py-5 border-b border-line bg-[#EAF4F7]">
+        <div class="flex-1">
+          <h2 class="m-0 text-lg font-bold text-ink">正式測驗說明</h2>
+          <p class="m-0 mt-1 text-sm text-dim">請仔細閱讀以下說明，了解本次任務的目的與完成方式。</p>
+        </div>
+        <i data-lucide="clipboard-list" class="w-10 h-10 text-primary shrink-0 opacity-50"></i>
+      </div>
+
+      <!-- Body -->
+      <div class="overflow-y-auto p-6 flex flex-col gap-5">
+
+        <!-- 任務目的 -->
+        <div>
+          <h3 class="m-0 mb-2 text-sm font-semibold flex items-center gap-2">
+            <i data-lucide="target" class="w-4 h-4 text-primary shrink-0"></i> 任務目的
+          </h3>
+          <p class="m-0 text-sm text-dim leading-relaxed">
+            本次研究旨在了解使用者如何透過不同的搜尋方式，在區塊鏈知識庫中找到符合題目描述的目標關鍵字，藉此評估本系統的導覽效果。
+          </p>
+        </div>
+
+        <!-- 任務步驟 -->
+        <div>
+          <h3 class="m-0 mb-3 text-sm font-semibold flex items-center gap-2">
+            <i data-lucide="list-ordered" class="w-4 h-4 text-primary shrink-0"></i> 任務步驟
+          </h3>
+          <ol class="m-0 p-0 list-none flex flex-col gap-3">
+            <li class="flex items-start gap-3">
+              <span class="shrink-0 w-6 h-6 rounded-full bg-mark text-mark-fg text-xs flex items-center justify-center font-semibold mt-0.5">1</span>
+              <span class="text-sm text-dim leading-relaxed">閱讀系統顯示的題目，了解你需要找的目標概念。</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="shrink-0 w-6 h-6 rounded-full bg-mark text-mark-fg text-xs flex items-center justify-center font-semibold mt-0.5">2</span>
+              <span class="text-sm text-dim leading-relaxed">
+                使用 <strong class="text-ink">快速搜尋</strong>、<strong class="text-ink">引導式搜尋</strong> 或 <strong class="text-ink">主題分類</strong>，找到對應的關鍵字頁面。
+              </span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="shrink-0 w-6 h-6 rounded-full bg-mark text-mark-fg text-xs flex items-center justify-center font-semibold mt-0.5">3</span>
+              <span class="text-sm text-dim leading-relaxed">進入關鍵字內容頁，閱讀說明，確認該關鍵字符合題目描述。</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="shrink-0 w-6 h-6 rounded-full bg-mark text-mark-fg text-xs flex items-center justify-center font-semibold mt-0.5">4</span>
+              <span class="text-sm text-dim leading-relaxed">
+                點擊頁面下方的 <strong class="text-ink">「我選這個關鍵詞」</strong> 按鈕，完成本題。
+              </span>
+            </li>
+          </ol>
+        </div>
+
+        <!-- 完成條件 -->
+        <div class="bg-[#EAF4F7] border border-line rounded-xl p-4">
+          <h3 class="m-0 mb-3 text-sm font-semibold flex items-center gap-2">
+            <i data-lucide="check-circle" class="w-4 h-4 text-primary shrink-0"></i> 什麼狀態算「完成」？
+          </h3>
+          <ul class="m-0 p-0 list-none flex flex-col gap-2">
+            <li class="flex items-start gap-2 text-sm text-dim">
+              <i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i>
+              <span>點擊目標關鍵字頁面底部的 <strong class="text-ink">「我選這個關鍵詞」</strong> 按鈕，即代表本題完成。</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-dim">
+              <i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i>
+              <span>共有多道題目，每題完成後系統會自動進入下一題。</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-dim">
+              <i data-lucide="info" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i>
+              <span>請依照實際查詢過程自然操作，不需刻意跳過任何步驟。</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="shrink-0 flex justify-end px-6 py-4 border-t border-line bg-[#FCFAF2]">
+        <button type="button" onclick="closeTaskIntro()"
+                class="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-dark transition-colors">
+          <i data-lucide="check" class="w-4 h-4"></i> 我了解了，開始填寫
+        </button>
+      </div>
+
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- 題目卡片 -->
   <div class="h-full flex items-center justify-center">
     <div class="max-w-lg w-full bg-white border border-line rounded-xl shadow-sm p-12 text-center">
       <span class="inline-block text-xs px-2 py-0.5 rounded-md bg-surface border border-line text-dim mb-4">
@@ -18,4 +112,20 @@
       </form>
     </div>
   </div>
+
+{% endblock %}
+{% block extra_js %}
+  {% if task_number == 1 %}
+  <script>
+    function closeTaskIntro() {
+      document.getElementById("task-intro-modal").classList.add("hidden");
+      sessionStorage.setItem("task_intro_seen", "1");
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+      if (!sessionStorage.getItem("task_intro_seen")) {
+        document.getElementById("task-intro-modal").classList.remove("hidden");
+      }
+    });
+  </script>
+  {% endif %}
 {% endblock %}

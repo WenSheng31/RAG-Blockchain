@@ -67,14 +67,16 @@ function fetchResults() {
         return;
       }
 
-      resultList.innerHTML = data.results.map(kw =>
-        `<div class="border border-line rounded-lg p-4 cursor-pointer hover:bg-lift transition-colors"
-              onclick="handleResultClick(${kw.id}, ${JSON.stringify(kw.keyword)}, ${JSON.stringify(kw.url)})">
+      resultList.innerHTML = data.results.map(kw => {
+        const kwJson  = JSON.stringify(kw.keyword).replace(/"/g, "&quot;");
+        const urlJson = JSON.stringify(kw.url).replace(/"/g, "&quot;");
+        return `<div class="border border-line rounded-lg p-4 cursor-pointer hover:bg-lift transition-colors"
+              onclick="handleResultClick(${kw.id}, ${kwJson}, ${urlJson})">
            <div class="guided-result-title">${kw.keyword}</div>
            <div class="guided-result-meta">${kw.group}${kw.category ? " / " + kw.category : ""}</div>
            <div class="guided-result-count">文章 ${kw.article_count} · Q&amp;A ${kw.question_count}</div>
-         </div>`
-      ).join("");
+         </div>`;
+      }).join("");
     })
     .catch(() => {
       resultList.innerHTML = '<div class="guided-empty">搜尋失敗，請稍後再試。</div>';
@@ -131,6 +133,15 @@ function bindOptionClicks(container) {
     btn.removeEventListener("click", handleOptionClick);
     btn.addEventListener("click", handleOptionClick);
   });
+}
+
+function openGuidedModal() {
+  document.getElementById("guided-modal").classList.remove("hidden");
+  resetGuided();
+}
+
+function closeGuidedModal() {
+  document.getElementById("guided-modal").classList.add("hidden");
 }
 
 function resetGuided() {

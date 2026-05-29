@@ -1,0 +1,108 @@
+{% extends "knowledge/base.html" %}
+{% load static %}
+{% block title %}學習路徑{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto flex flex-col gap-0">
+
+  <!-- ── 根節點 ──────────────────────────────────────────────────── -->
+  <div class="bg-ink text-white rounded-xl p-6 shadow-sm">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+        <i data-lucide="map" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <p class="m-0 text-xs text-white/50 font-medium tracking-wide">Knowledge Map</p>
+        <h1 class="m-0 text-xl font-bold leading-tight">區塊鏈知識學習路徑</h1>
+      </div>
+    </div>
+    <p class="m-0 text-sm text-white/65 leading-relaxed">
+      從基礎概念出發，逐步深入到技術與安全機制。點擊任一關鍵字可查看完整說明、文章與 Q&amp;A。
+    </p>
+  </div>
+
+  <!-- 連接線 -->
+  <div class="flex justify-center py-1">
+    <div class="w-px h-6 bg-line-dark"></div>
+  </div>
+
+  <!-- ── 四大主題節點 ──────────────────────────────────────────────── -->
+  {% for topic in topics %}
+
+    <details class="group bg-white border border-line rounded-xl overflow-hidden shadow-sm" open>
+
+      <!-- 主題標頭 -->
+      <summary class="flex items-center gap-3 px-5 py-4 cursor-pointer list-none
+                      border-l-4 {{ topic.border_css }}
+                      hover:bg-lift transition-colors [&::marker]:hidden">
+        <span class="shrink-0 text-xs px-2 py-0.5 rounded-full font-medium {{ topic.badge_css }}">
+          {{ topic.difficulty }}
+        </span>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-semibold text-ink">{{ topic.title }}</div>
+          <div class="text-xs text-dim mt-0.5 truncate">{{ topic.subtitle }}</div>
+        </div>
+        <i data-lucide="chevron-down"
+           class="w-4 h-4 text-dim shrink-0 transition-transform group-open:rotate-180"></i>
+      </summary>
+
+      <!-- 說明區塊 -->
+      <div class="border-t border-line px-5 py-4 flex flex-col gap-3 bg-[#FCFAF2]">
+
+        <!-- 白話說明 -->
+        <p class="m-0 text-sm text-dim leading-relaxed">{{ topic.description }}</p>
+
+        <!-- 本節核心概念 -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-medium text-dim shrink-0">本節核心概念</span>
+          {% for concept in topic.core_concepts %}
+            <span class="text-xs px-2.5 py-1 rounded-full bg-white border border-line text-ink font-medium shadow-sm">
+              {{ concept }}
+            </span>
+          {% endfor %}
+        </div>
+
+      </div>
+
+      <!-- 關鍵字卡片區 -->
+      <div class="p-4">
+        <p class="m-0 mb-3 text-xs font-medium text-dim">相關關鍵字</p>
+        {% if topic.keywords %}
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {% for kw in topic.keywords %}
+              <a href="{% url 'question_list' kw.id %}"
+                 class="block bg-surface border border-line rounded-lg p-3
+                        hover:bg-lift hover:border-line-dark hover:shadow-sm
+                        transition-all group/kw">
+                <div class="flex items-start justify-between gap-2 mb-1">
+                  <span class="text-sm font-medium text-ink leading-snug group-hover/kw:text-primary transition-colors">
+                    {{ kw.keyword }}
+                  </span>
+                  {% if kw.article_count %}
+                    <span class="shrink-0 text-xs text-dim">{{ kw.article_count }} 篇</span>
+                  {% endif %}
+                </div>
+                {% if kw.keyword_en %}
+                  <div class="text-xs text-dim">{{ kw.keyword_en }}</div>
+                {% endif %}
+              </a>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-center py-4 text-sm text-dim">目前尚無對應關鍵字。</p>
+        {% endif %}
+      </div>
+
+
+    </details>
+
+    <!-- 主題之間的連接線（最後一個不顯示） -->
+    {% if not forloop.last %}
+      <div class="flex justify-center py-1">
+        <div class="w-px h-5 bg-line-dark"></div>
+      </div>
+    {% endif %}
+
+  {% endfor %}
+
+</div>
+{% endblock %}

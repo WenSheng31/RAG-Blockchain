@@ -1,20 +1,37 @@
 {% extends "knowledge/base.html" %}
 {% load static %}
 {% block title %}首頁{% endblock %}
+{% block page_head %}
+<style>
+  .guided-step.active    { background-color: var(--c-accent); color: var(--c-accent-fg); border-color: transparent; }
+  .guided-option.selected{ background-color: var(--c-accent); color: var(--c-accent-fg); border-color: transparent; }
+  .guided-result-title   { font-size: 0.875rem; font-weight: 500; color: var(--c-text); }
+  .guided-result-meta    { font-size: 0.75rem; color: var(--c-muted); margin-top: 0.25rem; }
+  .guided-result-count   { font-size: 0.75rem; color: var(--c-muted); margin-top: 0.125rem; }
+  .guided-loading        { padding: 0.75rem; font-size: 0.875rem; color: var(--c-muted); }
+  .guided-empty          { grid-column: 1 / -1; padding: 2.5rem 0; font-size: 0.875rem; color: var(--c-muted); text-align: center; }
+</style>
+{% endblock %}
 {% block content %}
   <div class="max-w-7xl mx-auto flex flex-col gap-5">
     <!-- Hero 主標題區塊 -->
     <section class="bg-white border border-line rounded-xl p-6 md:p-8">
-      <div class="max-w-2xl">
-        <p class="mb-2 text-sm font-medium text-primary">
-          Blockchain Knowledge Navigation
-        </p>
-        <h1 class="m-0 mb-3 text-lg md:text-4xl font-bold tracking-wide text-ink">
-          區塊鏈知識智慧導航系統
-        </h1>
-        <p class="m-0 text-sm md:text-base leading-relaxed text-dim">
-          快速查找區塊鏈技術、密碼學與生態概念，提供系統化的關鍵字導引。
-        </p>
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div class="max-w-2xl">
+          <p class="mb-2 text-sm font-medium text-primary">
+            Blockchain Knowledge Navigation
+          </p>
+          <h1 class="m-0 mb-3 text-lg md:text-4xl font-bold tracking-wide text-ink">
+            區塊鏈知識智慧導航系統
+          </h1>
+          <p class="m-0 text-sm md:text-base leading-relaxed text-dim">
+            快速查找區塊鏈技術、密碼學與生態概念，提供系統化的關鍵字導引。
+          </p>
+        </div>
+        <button type="button" onclick="showOnboarding()"
+                class="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-line text-sm hover:bg-lift transition-colors">
+          <i data-lucide="info" class="w-4 h-4 text-dim"></i> 查看操作說明
+        </button>
       </div>
     </section>
 
@@ -48,19 +65,26 @@
           <p class="m-0 text-sm text-dim">透過3個簡單問題，讓系統協助你縮小範圍，精準推薦您需要的關鍵字。</p>
         </div>
       </div>
-      <a href="{% url 'guided_search' %}"
-         class="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg
-          bg-primary text-white text-sm font-medium shadow-sm
-          hover:bg-primary-dark hover:shadow-md transition-all">
+      <button type="button" onclick="openGuidedModal()"
+              class="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg
+               bg-primary text-white text-sm font-medium shadow-sm
+               hover:bg-primary-dark hover:shadow-md transition-all">
         開始引導搜尋
-      </a>
+      </button>
     </section>
 
     <!-- 主題卡片 -->
-    <section>
+    <section class="bg-white border border-line rounded-xl p-5">
+      <div class="flex items-start gap-4 mb-4">
+        <i data-lucide="layout-grid" class="w-4 h-4 shrink-0 mt-1 text-dim"></i>
+        <div>
+          <h2 class="m-0 mb-1 text-base font-semibold">主題分類瀏覽</h2>
+          <p class="m-0 text-sm text-dim">按主題探索所有相關關鍵字。</p>
+        </div>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {% for group in groups %}
-          <div class="bg-white border border-line rounded-xl p-4 flex flex-col">
+          <div class="bg-surface border border-line rounded-xl p-4 flex flex-col">
             <div class="flex-1 mb-4">
               <h5 class="m-0 mb-2 text-base font-semibold leading-snug text-ink">{{ group.name }}</h5>
               <p class="m-0 text-sm md:text-[15px] leading-6 text-dim text-justify">{{ group.description|linebreaksbr|default:"尚無描述" }}</p>
@@ -75,7 +99,172 @@
     </section>
 
   </div>
+
+  <!-- 新手引導 Modal（z-index 高於 guided-modal） -->
+  <div id="onboarding-modal" class="hidden fixed inset-0 z-[9700] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50"></div>
+    <div class="relative w-full max-w-2xl max-h-[92vh] flex flex-col bg-white border border-line rounded-xl shadow-xl overflow-hidden">
+
+      <!-- Step 1：認識系統 -->
+      <div id="ob-step-1">
+        <div class="shrink-0 flex items-center gap-4 px-6 py-5 border-b border-line bg-[#EAF4F7]">
+          <div class="flex-1">
+            <h2 class="m-0 text-lg font-bold text-ink">歡迎使用區塊鏈知識導航系統</h2>
+            <p class="m-0 mt-1 text-sm text-dim">在開始之前，先認識本系統的主要功能區塊。</p>
+          </div>
+          <i data-lucide="map" class="w-10 h-10 text-primary shrink-0 opacity-50"></i>
+        </div>
+
+        <div class="overflow-y-auto p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="border border-line rounded-xl p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 rounded-lg bg-[#DCEAF0] flex items-center justify-center shrink-0">
+                <i data-lucide="search" class="w-4 h-4 text-primary"></i>
+              </div>
+              <span class="text-sm font-semibold">快速搜尋</span>
+            </div>
+            <p class="m-0 text-xs text-dim leading-relaxed">
+              直接在搜尋框輸入關鍵字前幾個字，系統自動顯示相關詞彙建議，點擊即可進入對應頁面。
+            </p>
+          </div>
+
+          <div class="border border-line rounded-xl p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 rounded-lg bg-[#DCEAF0] flex items-center justify-center shrink-0">
+                <i data-lucide="compass" class="w-4 h-4 text-primary"></i>
+              </div>
+              <span class="text-sm font-semibold">引導式搜尋</span>
+            </div>
+            <p class="m-0 text-xs text-dim leading-relaxed">
+              透過 3 個簡單問題，系統協助你逐步縮小範圍，精準推薦符合需求的關鍵詞。不確定從哪裡開始時使用。
+            </p>
+          </div>
+
+          <div class="border border-line rounded-xl p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 rounded-lg bg-[#DCEAF0] flex items-center justify-center shrink-0">
+                <i data-lucide="layout-grid" class="w-4 h-4 text-primary"></i>
+              </div>
+              <span class="text-sm font-semibold">主題分類瀏覽</span>
+            </div>
+            <p class="m-0 text-xs text-dim leading-relaxed">
+              按主題分類瀏覽所有關鍵字，適合想探索特定領域（如共識機制、錢包類型）的使用者。
+            </p>
+          </div>
+
+          <div class="border border-line rounded-xl p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 rounded-lg bg-[#DCEAF0] flex items-center justify-center shrink-0">
+                <i data-lucide="book-open" class="w-4 h-4 text-primary"></i>
+              </div>
+              <span class="text-sm font-semibold">關鍵字內容頁</span>
+            </div>
+            <p class="m-0 text-xs text-dim leading-relaxed">
+              點擊任一關鍵字後，可查看 AI 摘要、相關介紹文章、Q&amp;A 問答集，以及延伸的相關關鍵詞。
+            </p>
+          </div>
+        </div>
+
+        <div class="shrink-0 flex justify-end px-6 py-4 border-t border-line bg-[#FCFAF2]">
+          <button type="button" onclick="closeOnboarding()"
+                  class="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-dark transition-colors">
+            <i data-lucide="check" class="w-4 h-4"></i> 我了解了，開始使用
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 引導搜尋 Modal -->
+  <div id="guided-modal" class="hidden fixed inset-0 z-[9500] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" onclick="closeGuidedModal()"></div>
+    <div class="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-white border border-line rounded-xl shadow-xl overflow-hidden">
+
+      <!-- Modal Header -->
+      <div class="shrink-0 flex items-center justify-between gap-3 px-5 py-4 border-b border-line bg-[#EAF4F7]">
+        <div>
+          <h3 class="m-0 text-base font-semibold">引導式搜尋</h3>
+          <p class="m-0 text-xs text-dim mt-0.5">透過幾個簡單問題，精準推薦你需要的關鍵字。</p>
+        </div>
+        <button type="button" onclick="closeGuidedModal()"
+                class="shrink-0 w-8 h-8 rounded-md border border-line flex items-center justify-center hover:bg-lift transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="flex-1 overflow-y-auto p-5 flex flex-col gap-5">
+
+        <!-- 問答卡片 -->
+        <div class="border border-line rounded-xl p-5">
+
+          <!-- 步驟指示器 -->
+          <div class="flex items-center justify-center mb-6">
+            {% for step in guided_steps %}
+              <div class="w-9 h-9 rounded-md border border-line flex items-center justify-center text-sm font-medium guided-step transition-colors
+                          {% if forloop.first %}bg-mark text-mark-fg border-transparent{% else %}text-dim{% endif %}"
+                   data-step-indicator="{{ step.step }}">{{ step.step }}</div>
+              {% if not forloop.last %}
+                <div class="w-12 border-t border-line mx-1"></div>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          <!-- 問題區 -->
+          {% for step in guided_steps %}
+            <section class="guided-question {% if forloop.first %}active{% endif %}" data-step="{{ step.step }}">
+              <h3 class="text-center text-base font-semibold mb-5">{{ step.question }}</h3>
+              <div class="guided-options grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {% for option in step.options %}
+                  <button type="button"
+                          class="guided-option border border-line rounded-lg p-4 text-sm text-left cursor-pointer hover:bg-lift hover:border-line-dark transition-colors"
+                          data-field="{{ step.field }}"
+                          data-value="{{ option }}">{{ option }}</button>
+                {% endfor %}
+              </div>
+            </section>
+          {% endfor %}
+
+          <!-- 操作按鈕 -->
+          <div class="flex justify-center gap-3 mt-6 pt-5 border-t border-line">
+            <button id="prev-step-btn" type="button"
+                    class="px-4 py-2 rounded-md border border-line text-sm hover:bg-lift transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    disabled>上一步</button>
+            <button id="reset-guided-btn" type="button"
+                    class="px-4 py-2 rounded-md border border-line text-sm hover:bg-lift transition-colors">重新選擇</button>
+          </div>
+        </div>
+
+        <!-- 結果區 -->
+        <div id="guided-result-area" class="hidden">
+          <div class="border border-line rounded-xl p-5">
+            <div class="mb-4">
+              <h3 class="m-0 mb-1 text-base font-semibold">推薦關鍵詞</h3>
+              <p id="guided-result-summary" class="m-0 text-sm text-dim"></p>
+            </div>
+            <div id="guided-result-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 {% endblock %}
 {% block extra_js %}
   <script src="{% static 'js/keyword_search.js' %}"></script>
+  <script src="{% static 'js/guided_search.js' %}"></script>
+  <script>
+    function showOnboarding() {
+      document.getElementById("onboarding-modal").classList.remove("hidden");
+    }
+    function closeOnboarding() {
+      document.getElementById("onboarding-modal").classList.add("hidden");
+      sessionStorage.setItem("ob_seen", "1");
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+      if (!sessionStorage.getItem("ob_seen")) showOnboarding();
+    });
+  </script>
 {% endblock %}
