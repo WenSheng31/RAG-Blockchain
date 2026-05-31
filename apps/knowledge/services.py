@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from .models import AISummaryCache, KeywordCategory, Article, Keyword, KeywordGroup, Question
 from .guided_search_config import (
     GUIDED_SEARCH_STEPS,
+    apply_goal_sort,
     build_guided_query,
     get_guided_result_message,
     get_step2_options,
@@ -242,7 +243,7 @@ def get_guided_search_results(type_choice: str, context_choice: str, goal_choice
     )
     if q_filter:
         qs = qs.filter(q_filter)
-    qs = qs.order_by("-article_count", "-question_count", "keyword").distinct()[:20]
+    qs = apply_goal_sort(qs, goal_choice).distinct()[:20]
 
     results = [
         {

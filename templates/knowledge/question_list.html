@@ -2,7 +2,7 @@
 {% load static %}
 {% block title %}{{ keyword.keyword }} — 關鍵字詳情{% endblock %}
 {% block content %}
-  <div class="max-w-7xl mx-auto flex flex-col gap-5">
+  <div class="max-w-7xl mx-auto flex flex-col gap-5{% if request.session.task_active %} pb-20{% endif %}">
 
     <!-- 麵包屑 -->
     <nav class="flex flex-wrap items-center gap-2 text-sm text-dim">
@@ -15,9 +15,11 @@
 
     <!-- 頁面標頭 -->
     <div class="flex items-center gap-3">
-      <a href="{% url 'keyword_list' group.id category.id %}"
+      <a id="back-btn"
+         href="{% url 'keyword_list' group.id category.id %}"
          class="px-3 py-1.5 rounded-md border border-line text-sm flex items-center gap-2 shrink-0 bg-primary-light text-white transition-colors">
-        <i data-lucide="arrow-left" class="w-4 h-4"></i> 回分類
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span id="back-label">回分類</span>
       </a>
       <h2 class="flex-1 min-w-0 m-0 text-xl font-semibold truncate">{{ keyword.keyword }}</h2>
       <a href="{% url 'topic_list' %}"
@@ -251,19 +253,29 @@
       </div>
     </section>
 
-    <!-- 完成本題（測驗中） -->
-    {% if request.session.task_active %}
-      <section class="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
-        <p class="mb-4 text-sm text-green-800">若你已確認「{{ keyword.keyword }}」即為本題所需的關鍵詞，請點選下方按鈕完成本題。</p>
-        <a href="{% url 'finish_task' keyword.id %}"
-           class="inline-flex items-center gap-2 px-8 py-3 rounded-lg bg-green-600 text-white text-sm font-semibold shadow-md hover:bg-green-700 active:scale-95 transition-all">
-          <i data-lucide="check-circle" class="w-4 h-4"></i>
-          我選這個關鍵詞
-        </a>
-      </section>
-    {% endif %}
 
   </div>
+
+  <!-- 浮動選題欄（測驗中） -->
+  {% if request.session.task_active %}
+  <div class="fixed bottom-6 inset-x-0 z-[900] flex justify-center pointer-events-none">
+    <div class="pointer-events-auto flex items-center gap-4 px-5 py-3 rounded-2xl
+                bg-white/75 backdrop-blur-md border border-green-200
+                shadow-[0_8px_32px_rgba(0,0,0,0.14)] w-auto max-w-[calc(100%-3rem)]">
+      <span class="shrink-0 w-7 h-7 rounded-full bg-green-100 flex items-center justify-center">
+        <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+      </span>
+      <p class="m-0 text-sm text-ink whitespace-nowrap">
+        確認「<strong class="font-semibold">{{ keyword.keyword }}</strong>」是本題所需的關鍵詞？
+      </p>
+      <a href="{% url 'finish_task' keyword.id %}"
+         class="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 active:scale-95 transition-all shadow-sm whitespace-nowrap">
+        <i data-lucide="check" class="w-4 h-4"></i>
+        我選這個
+      </a>
+    </div>
+  </div>
+  {% endif %}
 
   <!-- AI 來源全文 Modal -->
   <div id="source-modal" class="hidden fixed inset-0 z-[9500] flex items-center justify-center p-5">
@@ -285,6 +297,30 @@
 {% block extra_js %}
   <script src="{% static 'js/ai_summary.js' %}"></script>
   <script>
+(function () {
+  var LABELS = {
+    '/':               '回首頁',
+    '/learning-path/': '回新手入口',
+    '/guided-search/': '回引導搜尋',
+  };
+  try {
+    var ref = document.referrer;
+    if (!ref) return;
+    var refUrl = new URL(ref);
+    if (refUrl.origin !== window.location.origin) return;
+    var p = refUrl.pathname;
+    var label = LABELS[p];
+    if (!label) {
+      label = p.startsWith('/topics/') ? '回分類' : '回上一頁';
+    }
+    document.getElementById('back-label').textContent = label;
+    document.getElementById('back-btn').addEventListener('click', function (e) {
+      e.preventDefault();
+      history.back();
+    });
+  } catch (e) {}
+})();
+
 function loadArticleContent(details) {
   if (!details.open) return;
   if (details.dataset.loaded) return;

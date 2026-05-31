@@ -264,7 +264,11 @@
       sessionStorage.setItem("ob_seen", "1");
     }
     document.addEventListener("DOMContentLoaded", function () {
-      if (!sessionStorage.getItem("ob_seen")) showOnboarding();
+      if (!sessionStorage.getItem("ob_seen")) {
+        showOnboarding();
+      } else if (new URLSearchParams(window.location.search).get("guided") === "1") {
+        openGuidedModal();
+      }
     });
   </script>
 {% endblock %}

@@ -1,6 +1,17 @@
 {% extends "knowledge/base.html" %}
 {% load static %}
 {% block title %}學習路徑{% endblock %}
+{% block page_head %}
+<style>
+  .guided-step.active    { background-color: var(--c-accent); color: var(--c-accent-fg); border-color: transparent; }
+  .guided-option.selected{ background-color: var(--c-accent); color: var(--c-accent-fg); border-color: transparent; }
+  .guided-result-title   { font-size: 0.875rem; font-weight: 500; color: var(--c-text); }
+  .guided-result-meta    { font-size: 0.75rem; color: var(--c-muted); margin-top: 0.25rem; }
+  .guided-result-count   { font-size: 0.75rem; color: var(--c-muted); margin-top: 0.125rem; }
+  .guided-loading        { padding: 0.75rem; font-size: 0.875rem; color: var(--c-muted); }
+  .guided-empty          { grid-column: 1 / -1; padding: 2.5rem 0; font-size: 0.875rem; color: var(--c-muted); text-align: center; }
+</style>
+{% endblock %}
 {% block content %}
 <div class="max-w-3xl mx-auto flex flex-col gap-0">
 
@@ -104,5 +115,120 @@
 
   {% endfor %}
 
+  <!-- 連接線 -->
+  <div class="flex justify-center py-1">
+    <div class="w-px h-6 bg-line-dark"></div>
+  </div>
+
+  <!-- 試試引導搜尋 CTA -->
+  <div class="bg-primary rounded-xl p-6 text-white shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+      <div class="flex items-start gap-4 flex-1">
+        <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0 mt-0.5">
+          <i data-lucide="compass" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="m-0 mb-1 text-base font-semibold">還不確定從哪裡開始？</h3>
+          <p class="m-0 text-sm text-white/70 leading-relaxed">
+            透過 3 個簡單問題，引導搜尋能根據你的需求與目標，精準推薦最適合的關鍵字。
+          </p>
+        </div>
+      </div>
+      <button type="button" onclick="openGuidedModal()"
+         class="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg
+                bg-white text-primary text-sm font-semibold
+                hover:bg-surface transition-colors shadow-sm">
+        <i data-lucide="compass" class="w-4 h-4"></i>
+        開始引導搜尋
+      </button>
+    </div>
+  </div>
+
 </div>
+
+<!-- 引導搜尋 Modal -->
+<div id="guided-modal" class="hidden fixed inset-0 z-[9500] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40" onclick="closeGuidedModal()"></div>
+  <div class="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-white border border-line rounded-xl shadow-xl overflow-hidden">
+
+    <!-- Modal Header -->
+    <div class="shrink-0 flex items-center justify-between gap-3 px-5 py-4 border-b border-line bg-[#EAF4F7]">
+      <div>
+        <h3 class="m-0 text-base font-semibold">引導式搜尋</h3>
+        <p class="m-0 text-xs text-dim mt-0.5">透過幾個簡單問題，精準推薦你需要的關鍵字。</p>
+      </div>
+      <button type="button" onclick="closeGuidedModal()"
+              class="shrink-0 w-8 h-8 rounded-md border border-line flex items-center justify-center hover:bg-lift transition-colors">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="flex-1 overflow-y-auto p-5 flex flex-col gap-5">
+
+      <!-- 問答卡片 -->
+      <div class="border border-line rounded-xl p-5">
+
+        <!-- 步驟指示器 -->
+        <div class="flex items-center justify-center mb-6">
+          {% for step in guided_steps %}
+            <div class="w-9 h-9 rounded-md border border-line flex items-center justify-center text-sm font-medium guided-step transition-colors
+                        {% if forloop.first %}bg-mark text-mark-fg border-transparent{% else %}text-dim{% endif %}"
+                 data-step-indicator="{{ step.step }}">{{ step.step }}</div>
+            {% if not forloop.last %}
+              <div class="w-12 border-t border-line mx-1"></div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- 問題區 -->
+        {% for step in guided_steps %}
+          <section class="guided-question {% if forloop.first %}active{% endif %}" data-step="{{ step.step }}">
+            <h3 class="text-center text-base font-semibold mb-5">{{ step.question }}</h3>
+            <div class="guided-options grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {% for option in step.options %}
+                <button type="button"
+                        class="guided-option border border-line rounded-lg p-4 text-sm text-left cursor-pointer hover:bg-lift hover:border-line-dark transition-colors"
+                        data-field="{{ step.field }}"
+                        data-value="{{ option }}">{{ option }}</button>
+              {% endfor %}
+            </div>
+          </section>
+        {% endfor %}
+
+        <!-- 操作按鈕 -->
+        <div class="flex justify-center gap-3 mt-6 pt-5 border-t border-line">
+          <button id="prev-step-btn" type="button"
+                  class="px-4 py-2 rounded-md border border-line text-sm hover:bg-lift transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled>上一步</button>
+          <button id="reset-guided-btn" type="button"
+                  class="px-4 py-2 rounded-md border border-line text-sm hover:bg-lift transition-colors">重新選擇</button>
+        </div>
+      </div>
+
+      <!-- 結果區 -->
+      <div id="guided-result-area" class="hidden">
+        <div class="border border-line rounded-xl p-5">
+          <div class="mb-4">
+            <h3 class="m-0 mb-1 text-base font-semibold">推薦關鍵詞</h3>
+            <p id="guided-result-summary" class="m-0 text-sm text-dim"></p>
+          </div>
+          <div id="guided-result-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+  <script src="{% static 'js/guided_search.js' %}"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (new URLSearchParams(window.location.search).get("guided") === "1") {
+        openGuidedModal();
+      }
+    });
+  </script>
 {% endblock %}

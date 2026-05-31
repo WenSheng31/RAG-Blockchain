@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, Case, When, IntegerField
 
 
 GUIDED_SEARCH_STEPS = [
@@ -64,9 +64,9 @@ GUIDED_SEARCH_STEPS = [
             "法規與政策": [
                 "監管",
                 "合法性",
-                "風險管理",
                 "金融科技",
                 "中央銀行數位貨幣",
+                "徵信管理",
                 "不確定",
             ],
             "不確定": [
@@ -95,300 +95,247 @@ GUIDED_SEARCH_STEPS = [
 ]
 
 
+# goal 排序優先關鍵字（用 keyword 欄位比對）
+GOAL_PRIORITY_KEYWORDS = {
+    "我想先知道它是什麼": [],
+    "我想知道它怎麼運作或怎麼使用": [
+        "共識機制", "智能合約", "工作量證明", "權益證明",
+        "雜湊函數", "默克爾樹", "閃電網路", "Rollup",
+        "去中心化應用程式", "鏈碼",
+    ],
+    "我想知道它有什麼風險": [
+        "漏洞", "釣魚攻擊", "駭客攻擊", "雙花攻擊",
+        "風險", "潛在風險", "風險管理", "社交工程學",
+        "詐騙識別", "私鑰安全",
+    ],
+    "我想知道它和其他概念的差異": [
+        "公有鏈", "私有鏈", "聯盟鏈",
+        "工作量證明", "權益證明", "委託權益證明",
+        "中心化交易所", "去中心化交易所",
+        "對稱加密", "非對稱加密",
+        "CAP 理論", "三難困境",
+    ],
+    "顯示這一類的全部關鍵詞": [],
+}
+
+
 GUIDED_SEARCH_RULES = {
     "type": {
         "幣種或資產": (
-            Q(keyword__icontains="加密貨幣")
-            | Q(keyword__icontains="幣種")
-            | Q(keyword__icontains="代幣")
-            | Q(keyword__icontains="穩定幣")
-            | Q(keyword__icontains="非同質化代幣")
-            | Q(keyword__icontains="Meme幣")
-            | Q(keyword__icontains="比特幣")
-            | Q(keyword__icontains="以太幣")
+            Q(id__in=[39, 42, 35, 50, 52, 127, 129, 180, 260, 266])
+            # 加密貨幣(39)、比特幣(42)、以太幣(35)、代幣(50)
+            # 非同質化代幣(52)、Meme幣(127)、幣種(129)
+            # 穩定幣(180)、DAI(260)、USDT(266)
         ),
         "平台或專案": (
-            Q(keyword__icontains="以太坊")
-            | Q(keyword__icontains="Polkadot")
-            | Q(keyword__icontains="Cosmos")
-            | Q(keyword__icontains="Fabric")
-            | Q(keyword__icontains="Hyperledger")
-            | Q(keyword__icontains="Corda")
-            | Q(keyword__icontains="區塊鏈即服務")
-            | Q(keyword__icontains="去中心化金融")
-            | Q(keyword__icontains="去中心化應用程式")
+            Q(id__in=[26, 25, 28, 222, 220, 38, 240, 259, 53])
+            # 以太坊(26)、Polkadot(25)、Cosmos(28)
+            # Hyperledger Fabric(222)、Corda(220)
+            # 區塊鏈即服務(38)、去中心化金融(240)
+            # 去中心化應用程式(259)、BNB Chain(53)
         ),
         "技術機制": (
-            Q(keyword__icontains="共識")
-            | Q(keyword__icontains="共識機制")
-            | Q(keyword__icontains="智能合約")
-            | Q(keyword__icontains="節點")
-            | Q(keyword__icontains="帳本")
-            | Q(keyword__icontains="區塊")
-            | Q(keyword__icontains="雜湊")
-            | Q(keyword__icontains="擴容")
-            | Q(keyword__icontains="分片")
+            Q(id__in=[90, 89, 41, 186, 218, 40, 252, 196, 86, 191])
+            # 共識機制(90)、共識(89)、智能合約(41)
+            # 節點(186)、帳本(218)、區塊鏈(40)
+            # 雜湊(252)、分片(196)、Rollup(86)、閃電網路(191)
         ),
         "錢包或安全": (
-            Q(keyword__icontains="錢包")
-            | Q(keyword__icontains="私鑰")
-            | Q(keyword__icontains="公鑰")
-            | Q(keyword__icontains="密鑰")
-            | Q(keyword__icontains="數位簽章")
-            | Q(keyword__icontains="私鑰安全")
-            | Q(keyword__icontains="釣魚攻擊")
-            | Q(keyword__icontains="駭客攻擊")
-            | Q(keyword__icontains="雙花攻擊")
+            Q(id__in=[242, 31, 30, 29, 47, 62, 124, 126, 216, 271, 179])
+            # 錢包(242)、私鑰(31)、公鑰(30)、密鑰(29)
+            # 數位簽章(47)、私鑰安全(62)、釣魚攻擊(124)
+            # 駭客攻擊(126)、雙花攻擊(216)、冷錢包(271)、硬體錢包(179)
         ),
         "市場與投資": (
-            Q(keyword__icontains="交易")
-            | Q(keyword__icontains="投資")
-            | Q(keyword__icontains="風險")
-            | Q(keyword__icontains="風險管理")
-            | Q(keyword__icontains="指標")
-            | Q(keyword__icontains="指數")
-            | Q(keyword__icontains="市值")
-            | Q(keyword__icontains="現貨交易所買賣基金")
-            | Q(keyword__icontains="期貨")
+            Q(id__in=[268, 241, 138, 125, 105, 107, 139, 174, 61, 275, 176, 173])
+            # 交易(268)、交易(241)、投資(138)、風險管理(125)
+            # 風險(105)、潛在風險(107)、指標(139)、市值(174)
+            # 現貨ETF(61)、期貨(275)、技術分析(176)、基本面分析(173)
         ),
         "法規與政策": (
-            Q(keyword__icontains="監管")
-            | Q(keyword__icontains="合法性")
-            | Q(keyword__icontains="金融科技")
-            | Q(keyword__icontains="中央銀行數位貨幣")
-            | Q(keyword__icontains="徵信管理")
-            | Q(keyword__icontains="風險管理")
+            Q(id__in=[75, 115, 34, 238, 248, 37])
+            # 監管(75)、合法性(115)、中央銀行數位貨幣(34)
+            # 金融科技(238)、徵信管理(248)、SWIFT(37)
         ),
-        "不確定": Q(),
+        "不確定": (
+            Q(id__in=[40, 41, 42, 186, 242, 31, 252, 89, 212, 237])
+            # 區塊鏈(40)、智能合約(41)、比特幣(42)
+            # 節點(186)、錢包(242)、私鑰(31)
+            # 雜湊(252)、共識(89)、去中心化(212)、分散式帳本(237)
+        ),
     },
 
     "context": {
+        # 幣種或資產
         "加密貨幣": (
-            Q(keyword__icontains="加密貨幣")
-            | Q(keyword__icontains="比特幣")
-            | Q(keyword__icontains="以太幣")
-            | Q(keyword__icontains="幣種")
-            | Q(keyword__icontains="貨幣")
+            Q(id__in=[39, 42, 35, 129, 239, 53, 177, 178])
+            # 加密貨幣(39)、比特幣(42)、以太幣(35)、幣種(129)
+            # Cryptocurrency(239)、BNB(53)、SHIB(177)、DOGE(178)
         ),
         "代幣": (
-            Q(keyword__icontains="代幣")
-            | Q(keyword__icontains="Token")
-            | Q(keyword__icontains="雙幣")
-            | Q(keyword__icontains="遊戲代幣")
+            Q(id__in=[50, 63, 183, 181])
+            # 代幣(50)、遊戲代幣(63)、質押(183)、空投(181)
         ),
         "穩定幣": (
-            Q(keyword__icontains="穩定幣")
-            | Q(keyword__icontains="USDT")
-            | Q(keyword__icontains="DAI")
+            Q(id__in=[180, 266, 260])
+            # 穩定幣(180)、USDT(266)、DAI(260)
         ),
         "非同質化代幣": (
-            Q(keyword__icontains="非同質化代幣")
-            | Q(keyword__icontains="NFT")
-            | Q(keyword__icontains="NFT交易市場")
-            | Q(keyword__icontains="NFT鑄造")
+            Q(id__in=[52, 55, 263, 59, 261])
+            # 非同質化代幣(52)、NFT交易市場(55)、NFT鑄造(263)
+            # 數位收藏品(59)、Doodles(261)
         ),
         "數位收藏品": (
-            Q(keyword__icontains="數位收藏品")
-            | Q(keyword__icontains="Doodles")
-            | Q(keyword__icontains="OpenSea")
+            Q(id__in=[59, 55, 261, 168])
+            # 數位收藏品(59)、NFT交易市場(55)、Doodles(261)、OpenSea(168)
         ),
 
+        # 平台或專案
         "以太坊": (
-            Q(keyword__icontains="以太坊")
-            | Q(keyword__icontains="以太幣")
-            | Q(keyword__icontains="以太坊域名服務")
-            | Q(keyword__icontains="ENS")
+            Q(id__in=[26, 35, 54, 58, 258, 267])
+            # 以太坊(26)、以太幣(35)、ENS(54)、以太坊域名服務(58)
+            # Gas(258)、zkSync(267)
         ),
-        "Polkadot": Q(keyword__icontains="Polkadot"),
-        "Cosmos": Q(keyword__icontains="Cosmos"),
+        "Polkadot": (
+            Q(id__in=[25, 193, 195])
+            # Polkadot(25)、系統鏈(193)、跨鏈(195)
+        ),
+        "Cosmos": (
+            Q(id__in=[28, 195])
+            # Cosmos(28)、跨鏈(195)
+        ),
         "Fabric": (
-            Q(keyword__icontains="Fabric")
-            | Q(keyword__icontains="Hyperledger")
-            | Q(keyword__icontains="鏈碼")
-            | Q(keyword__icontains="成員服務提供者")
+            Q(id__in=[222, 217, 220, 27, 70, 71, 225, 227, 228, 229])
+            # Hyperledger Fabric(222)、Hyperledger(217)、Corda(220)
+            # 鏈碼(27)、MSP(70)、背書過程(71)
+            # Fabric平台(225)、Fabric 1.0(227)、Fabric SDK(228)、Fabric v0.6(229)
         ),
         "去中心化金融": (
-            Q(keyword__icontains="去中心化金融")
-            | Q(keyword__icontains="DeFi")
-            | Q(keyword__icontains="DEX")
-            | Q(keyword__icontains="Uniswap")
-            | Q(keyword__icontains="借貸")
-            | Q(keyword__icontains="流動性挖礦")
+            Q(id__in=[240, 273, 272, 172, 181, 183, 123, 274, 269])
+            # 去中心化金融(240)、DeFi(273)、DEX(272)、Uniswap(172)
+            # 空投(181)、質押(183)、LP(123)、收益農場(274)、借貸(269)
         ),
 
+        # 技術機制
         "共識機制": (
-            Q(keyword__icontains="共識")
-            | Q(keyword__icontains="共識機制")
-            | Q(keyword__icontains="工作量證明")
-            | Q(keyword__icontains="權益證明")
-            | Q(keyword__icontains="委託權益證明")
-            | Q(keyword__icontains="Paxos")
-            | Q(keyword__icontains="Raft")
-            | Q(keyword__icontains="PBFT")
+            Q(id__in=[90, 89, 74, 68, 76, 72, 24, 87, 88, 91])
+            # 共識機制(90)、共識(89)、PoW(74)、PoS(68)
+            # DPoS(76)、PoA(72)、Paxos(24)、Raft(87)、PBFT(88)、BFT(91)
         ),
         "智能合約": (
-            Q(keyword__icontains="智能合約")
-            | Q(keyword__icontains="合約")
-            | Q(keyword__icontains="雜湊時間鎖定合約")
-            | Q(keyword__icontains="可撤銷序列成熟合約")
+            Q(id__in=[41, 258, 259, 27, 1])
+            # 智能合約(41)、Gas(258)、DApp(259)、鏈碼(27)、Solidity(1)
         ),
         "節點與帳本": (
-            Q(keyword__icontains="節點")
-            | Q(keyword__icontains="帳本")
-            | Q(keyword__icontains="數位帳本")
-            | Q(keyword__icontains="分散式帳本")
-            | Q(keyword__icontains="創世區塊")
+            Q(id__in=[186, 218, 237, 244, 194, 189, 214])
+            # 節點(186)、帳本(218)、分散式帳本(237)
+            # 數位帳本(244)、創世區塊(194)、驗證節點(189)、數據塊(214)
         ),
         "密碼學與雜湊": (
-            Q(keyword__icontains="密碼學")
-            | Q(keyword__icontains="加密")
-            | Q(keyword__icontains="解密")
-            | Q(keyword__icontains="雜湊")
-            | Q(keyword__icontains="雜湊演算法")
-            | Q(keyword__icontains="雜湊函數")
-            | Q(keyword__icontains="SHA-256")
+            Q(id__in=[10, 17, 18, 251, 252, 254, 255, 16, 12, 13, 14, 15])
+            # 密碼學(10)、古典密碼學(17)、現代密碼學(18)
+            # 雜湊函數(251)、雜湊(252)、雜湊演算法(254)、雜湊值(255)
+            # SHA-256(16)、對稱加密(12)、非對稱加密(13)、AES(14)、RSA(15)
         ),
         "擴容": (
-            Q(keyword__icontains="擴容")
-            | Q(keyword__icontains="Rollup")
-            | Q(keyword__icontains="分片")
-            | Q(keyword__icontains="側鏈")
-            | Q(keyword__icontains="閃電網路")
-            | Q(keyword__icontains="Layer2")
-            | Q(keyword__icontains="Layer3")
+            Q(id__in=[86, 196, 200, 191, 279, 280, 267, 160])
+            # Rollup(86)、分片(196)、側鏈(200)、閃電網路(191)
+            # Layer2(279)、Layer3(280)、zkSync(267)、Arbitrum(160)
         ),
 
+        # 錢包或安全
         "私鑰": (
-            Q(keyword__icontains="私鑰")
-            | Q(keyword__icontains="私鑰安全")
-            | Q(keyword__icontains="密鑰")
+            Q(id__in=[31, 62, 29, 30])
+            # 私鑰(31)、私鑰安全(62)、密鑰(29)、公鑰(30)
         ),
         "錢包": (
-            Q(keyword__icontains="錢包")
-            | Q(keyword__icontains="冷錢包")
-            | Q(keyword__icontains="硬體錢包")
+            Q(id__in=[242, 271, 179, 31])
+            # 錢包(242)、冷錢包(271)、硬體錢包(179)、私鑰(31)
         ),
         "數位簽章": (
-            Q(keyword__icontains="數位簽章")
-            | Q(keyword__icontains="簽名")
-            | Q(keyword__icontains="盲簽名")
-            | Q(keyword__icontains="環簽名")
-            | Q(keyword__icontains="群簽名")
-            | Q(keyword__icontains="多重簽名")
+            Q(id__in=[47, 66, 46])
+            # 數位簽章(47)、多重簽名(66)、數位證書(46)
         ),
         "釣魚攻擊": (
-            Q(keyword__icontains="釣魚攻擊")
-            | Q(keyword__icontains="詐騙識別")
-            | Q(keyword__icontains="社交工程學")
+            Q(id__in=[124, 278, 234, 126])
+            # 釣魚攻擊(124)、詐騙識別(278)、社交工程學(234)、駭客攻擊(126)
         ),
         "冷錢包": (
-            Q(keyword__icontains="冷錢包")
-            | Q(keyword__icontains="硬體錢包")
-            | Q(keyword__icontains="資金")
+            Q(id__in=[271, 179, 31, 62])
+            # 冷錢包(271)、硬體錢包(179)、私鑰(31)、私鑰安全(62)
         ),
 
+        # 市場與投資
         "交易": (
-            Q(keyword__icontains="交易")
-            | Q(keyword__icontains="交易量")
-            | Q(keyword__icontains="交易者")
-            | Q(keyword__icontains="金融交易")
-            | Q(keyword__icontains="中心化交易所")
-            | Q(keyword__icontains="去中心化交易所")
+            Q(id__in=[268, 241, 57, 272, 128, 231, 246])
+            # 交易(268)、交易(241)、CEX(57)、DEX(272)
+            # 交易量(128)、交易者(231)、金融交易(246)
         ),
         "投資": (
-            Q(keyword__icontains="投資")
-            | Q(keyword__icontains="基本面分析")
-            | Q(keyword__icontains="技術分析")
-            | Q(keyword__icontains="策略")
+            Q(id__in=[138, 173, 176, 142, 157, 158])
+            # 投資(138)、基本面分析(173)、技術分析(176)
+            # 策略(142)、基本面(157)、技術面(158)
         ),
         "風險": (
-            Q(keyword__icontains="風險")
-            | Q(keyword__icontains="潛在風險")
-            | Q(keyword__icontains="風險管理")
-            | Q(keyword__icontains="駭客攻擊")
+            Q(id__in=[105, 107, 125, 109, 126, 216])
+            # 風險(105)、潛在風險(107)、風險管理(125)
+            # 漏洞(109)、駭客攻擊(126)、雙花攻擊(216)
         ),
         "指標": (
-            Q(keyword__icontains="指標")
-            | Q(keyword__icontains="指數")
-            | Q(keyword__icontains="市值")
-            | Q(keyword__icontains="總鎖倉價值")
-            | Q(keyword__icontains="歷史最高價")
+            Q(id__in=[139, 174, 265, 185, 128])
+            # 指標(139)、市值(174)、TVL(265)、ATH(185)、交易量(128)
         ),
         "現貨交易所買賣基金": (
-            Q(keyword__icontains="現貨交易所買賣基金")
-            | Q(keyword__icontains="ETF")
-            | Q(keyword__icontains="金融科技")
+            Q(id__in=[61, 275, 121])
+            # 現貨ETF(61)、期貨(275)、期權(121)
         ),
 
+        # 法規與政策
         "監管": (
-            Q(keyword__icontains="監管")
-            | Q(keyword__icontains="合法性")
+            Q(id__in=[75, 115, 238])
+            # 監管(75)、合法性(115)、金融科技(238)
         ),
-        "合法性": Q(keyword__icontains="合法性"),
+        "合法性": (
+            Q(id__in=[115, 75])
+            # 合法性(115)、監管(75)
+        ),
         "金融科技": (
-            Q(keyword__icontains="金融科技")
-            | Q(keyword__icontains="中央銀行數位貨幣")
+            Q(id__in=[238, 34, 37])
+            # 金融科技(238)、CBDC(34)、SWIFT(37)
         ),
-        "中央銀行數位貨幣": Q(keyword__icontains="中央銀行數位貨幣"),
-        "徵信管理": Q(keyword__icontains="徵信管理"),
+        "中央銀行數位貨幣": (
+            Q(id__in=[34, 238])
+            # CBDC(34)、金融科技(238)
+        ),
+        "徵信管理": (
+            Q(id__in=[248, 75])
+            # 徵信管理(248)、監管(75)
+        ),
 
+        # 不確定路徑獨有的 context（無對應 type 分類）
         "開發": (
-            Q(keyword__icontains="開發")
-            | Q(keyword__icontains="編程")
-            | Q(keyword__icontains="部署")
-            | Q(keyword__icontains="API3")
-            | Q(keyword__icontains="Golang")
+            Q(id__in=[1, 143, 151, 259, 27])
+            # Solidity(1)、編程(143)、API3(151)、DApp(259)、鏈碼(27)
         ),
-        "區塊鏈": Q(keyword__icontains="區塊鏈"),
+        "區塊鏈": (
+            Q(id__in=[40, 237, 212, 97, 186, 89])
+            # 區塊鏈(40)、分散式帳本(237)、去中心化(212)
+            # 不可篡改性(97)、節點(186)、共識(89)
+        ),
 
-        "不確定": Q(),
-    },
-
-    "goal": {
-        "我想先知道它是什麼": Q(),
-        "我想知道它怎麼運作或怎麼使用": (
-            Q(keyword__icontains="運作")
-            | Q(keyword__icontains="操作")
-            | Q(keyword__icontains="應用")
-            | Q(keyword__icontains="部署")
-            | Q(keyword__icontains="開發")
-            | Q(keyword__icontains="交易")
+        "不確定": (
+            Q(id__in=[40, 41, 42, 186, 242, 31, 252, 89, 212, 237])
         ),
-        "我想知道它有什麼風險": (
-            Q(keyword__icontains="風險")
-            | Q(keyword__icontains="潛在風險")
-            | Q(keyword__icontains="風險管理")
-            | Q(keyword__icontains="攻擊")
-            | Q(keyword__icontains="漏洞")
-            | Q(keyword__icontains="詐騙識別")
-        ),
-        "我想知道它和其他概念的差異": (
-            Q(keyword__icontains="比較")
-            | Q(keyword__icontains="差異")
-            | Q(keyword__icontains="機制")
-            | Q(keyword__icontains="架構")
-            | Q(keyword__icontains="結構")
-        ),
-        "顯示這一類的全部關鍵詞": Q(),
     },
 }
 
 
-BEGINNER_GUIDE_QUERY = (
-    Q(keyword__icontains="區塊鏈")
-    | Q(keyword__icontains="分散式帳本")
-    | Q(keyword__icontains="區塊")
-    | Q(keyword__icontains="節點")
-    | Q(keyword__icontains="交易")
-    | Q(keyword__icontains="錢包")
-    | Q(keyword__icontains="私鑰")
-    | Q(keyword__icontains="公鑰")
-    | Q(keyword__icontains="雜湊")
-    | Q(keyword__icontains="共識")
-    | Q(keyword__icontains="智能合約")
-    | Q(keyword__icontains="比特幣")
-    | Q(keyword__icontains="以太坊")
+BEGINNER_GUIDE_QUERY = Q(
+    id__in=[40, 237, 186, 241, 242, 31, 252, 89, 41, 42, 26, 212]
 )
+# 區塊鏈(40)、分散式帳本(237)、節點(186)、交易(241)
+# 錢包(242)、私鑰(31)、雜湊(252)、共識(89)
+# 智能合約(41)、比特幣(42)、以太坊(26)、去中心化(212)
 
 
 def get_step2_options(type_choice):
@@ -399,42 +346,48 @@ def get_step2_options(type_choice):
     )
 
 
-def build_guided_query(type_choice="", context_choice="", goal_choice=""):
-    """
-    將使用者三題答案轉成 Django Q 查詢條件。
+def apply_goal_sort(queryset, goal_choice):
+    _default = ('-article_count', '-question_count', 'keyword')
+    priority = GOAL_PRIORITY_KEYWORDS.get(goal_choice, [])
+    if not priority:
+        return queryset.order_by(*_default)
+    priority_cases = [
+        When(keyword__icontains=kw, then=i)
+        for i, kw in enumerate(priority)
+    ]
+    return queryset.annotate(
+        goal_priority=Case(
+            *priority_cases,
+            default=len(priority),
+            output_field=IntegerField()
+        )
+    ).order_by('goal_priority', *_default)
 
-    若 Step 1 與 Step 2 都選「不確定」，
-    視為初學者探索模式，回傳基礎區塊鏈入門關鍵詞。
-    """
+
+def build_guided_query(type_choice="", context_choice="", goal_choice=""):
     if type_choice == "不確定" and context_choice == "不確定":
         return BEGINNER_GUIDE_QUERY
 
-    q_filter = Q()
+    # context 選定後作為主要篩選器（type 只用於決定步驟2選項）
+    if context_choice and context_choice != "不確定":
+        context_rule = GUIDED_SEARCH_RULES["context"].get(context_choice)
+        if context_rule:
+            return context_rule
 
-    selected = {
-        "type": type_choice,
-        "context": context_choice,
-        "goal": goal_choice,
-    }
+    # 無具體 context 時退回 type 篩選
+    type_rule = GUIDED_SEARCH_RULES["type"].get(type_choice)
+    if type_rule:
+        return type_rule
 
-    for field, value in selected.items():
-        rule = GUIDED_SEARCH_RULES.get(field, {}).get(value)
-        if rule:
-            q_filter |= rule
-
-    return q_filter
+    return Q()
 
 
 def get_guided_result_message(type_choice="", context_choice="", goal_choice="", count=0):
-    """
-    依照使用者選擇產生結果說明文字。
-    """
     if type_choice == "不確定" and context_choice == "不確定":
         return (
             f"你目前尚未指定明確方向，因此系統提供 {count} 個適合初學者的"
             "基礎區塊鏈關鍵詞，協助你先建立第一層理解。"
         )
-
     return (
         f"你選擇了「{type_choice or '不確定'} / "
         f"{context_choice or '不確定'} / "
