@@ -39,6 +39,7 @@ class Keyword(models.Model):
     keyword_zh = models.CharField(max_length=255, blank=True, verbose_name="中文名稱")
     keyword_en = models.CharField(max_length=255, blank=True, verbose_name="英文全名")
     keyword_abbr = models.CharField(max_length=100, blank=True, verbose_name="英文縮寫")
+    definition = models.TextField(blank=True, verbose_name="定義")
     category = models.ForeignKey(
         KeywordCategory,
         on_delete=models.SET_NULL,
