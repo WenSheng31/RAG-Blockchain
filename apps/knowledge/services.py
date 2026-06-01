@@ -229,6 +229,7 @@ def get_learning_path_data() -> list:
                 "id": kw.id,
                 "keyword": kw.keyword,
                 "keyword_en": kw.keyword_en,
+                "definition": kw.definition,
                 "article_count": kw.article_count,
             }
             for kw in keywords

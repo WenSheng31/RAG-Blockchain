@@ -93,7 +93,10 @@
                   {% endif %}
                 </div>
                 {% if kw.keyword_en %}
-                  <div class="text-xs text-dim">{{ kw.keyword_en }}</div>
+                  <div class="text-xs text-dim mb-1">{{ kw.keyword_en }}</div>
+                {% endif %}
+                {% if kw.definition %}
+                  <div class="text-xs text-dim leading-relaxed line-clamp-2">{{ kw.definition }}</div>
                 {% endif %}
               </a>
             {% endfor %}

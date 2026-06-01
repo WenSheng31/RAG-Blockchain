@@ -47,7 +47,13 @@ class RAGService:
         context = "\n\n---\n\n".join(contexts)
         prompt = (
             f"請根據以下區塊鏈文章內容，用繁體中文統整並摘要說明「{keyword}」是什麼，"
-            f"輸出格式為 Markdown：\n\n{context}"
+            f"輸出格式為 Markdown。\n\n"
+            f"規則：\n"
+            f"1. 優先使用下方提供的文章內容進行摘要。\n"
+            f"2. 若文章內容不足以說明「{keyword}」，可補充你自身的知識，"
+            f"但必須在該段落開頭加上「> ⚠️ 以下內容為 AI 自行生成，非本知識網站文章摘要。」的引用區塊。\n"
+            f"3. 若完全無相關文章，則整篇以規則 2 的格式說明。\n\n"
+            f"文章內容：\n\n{context}"
         )
         try:
             import google.generativeai as genai
