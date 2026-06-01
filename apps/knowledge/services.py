@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404
 
 from .models import AISummaryCache, KeywordCategory, Article, Keyword, KeywordGroup, Question
@@ -84,10 +84,22 @@ def get_group_article_count(group_id: int) -> int:
 
 
 def get_autocomplete_keywords(q: str):
+    tokens = q.split()
+    if not tokens:
+        return Keyword.objects.none()
+    combined = Q()
+    for token in tokens:
+        combined |= (
+            Q(keyword__icontains=token)
+            | Q(keyword_zh__icontains=token)
+            | Q(keyword_en__icontains=token)
+            | Q(keyword_abbr__icontains=token)
+        )
     return (
         Keyword.objects
-        .filter(keyword__icontains=q)
+        .filter(combined)
         .select_related("category__group")
+        .distinct()
         .order_by("keyword")[:20]
     )
 
