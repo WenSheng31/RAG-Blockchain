@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 URL_PAGE_TYPE = {
     "topic_list": "topic",
+    "learning_path": "learning_path",
     "keyword_list": "keyword",
     "question_list": "keyword_item",
 }

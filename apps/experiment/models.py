@@ -8,6 +8,7 @@ class NavigationLog(models.Model):
         max_length=20,
         choices=[
             ("topic", "主題頁"),
+            ("learning_path", "新手入口"),
             ("keyword", "關鍵詞頁"),
             ("keyword_item", "關鍵字詳細頁"),
             ("search", "關鍵詞搜尋"),

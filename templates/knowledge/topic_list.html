@@ -54,6 +54,7 @@
     </section>
 
     <!-- 引導搜尋入口 -->
+    {% if not request.session.task_active %}
     <section class="bg-white border border-line rounded-xl p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-6">
       <div class="flex items-center gap-4">
         <div class="w-11 h-11 shrink-0 flex items-center justify-center rounded-lg bg-surface border border-line">
@@ -72,6 +73,7 @@
         開始引導搜尋
       </button>
     </section>
+    {% endif %}
 
     <!-- 主題卡片 -->
     <section class="bg-white border border-line rounded-xl p-5">
@@ -177,6 +179,7 @@
   </div>
 
   <!-- 引導搜尋 Modal -->
+  {% if not request.session.task_active %}
   <div id="guided-modal" class="hidden fixed inset-0 z-[9500] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40" onclick="closeGuidedModal()"></div>
     <div class="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-white border border-line rounded-xl shadow-xl overflow-hidden">
@@ -250,11 +253,14 @@
       </div>
     </div>
   </div>
+  {% endif %}
 
 {% endblock %}
 {% block extra_js %}
   <script src="{% static 'js/keyword_search.js' %}"></script>
+  {% if not request.session.task_active %}
   <script src="{% static 'js/guided_search.js' %}"></script>
+  {% endif %}
   <script>
     function showOnboarding() {
       document.getElementById("onboarding-modal").classList.remove("hidden");

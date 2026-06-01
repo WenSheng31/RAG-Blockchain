@@ -115,6 +115,7 @@ def keyword_autocomplete(request):
 
 
 def learning_path(request):
+    request._nav_page_name = "新手入口"
     return render(request, "knowledge/learning_path.html", {
         "topics": get_learning_path_data(),
         "guided_steps": GUIDED_SEARCH_STEPS,

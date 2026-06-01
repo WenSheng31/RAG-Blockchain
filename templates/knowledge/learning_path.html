@@ -124,6 +124,7 @@
   </div>
 
   <!-- 試試引導搜尋 CTA -->
+  {% if not request.session.task_active %}
   <div class="bg-primary rounded-xl p-6 text-white shadow-sm">
     <div class="flex flex-col sm:flex-row sm:items-center gap-4">
       <div class="flex items-start gap-4 flex-1">
@@ -146,10 +147,12 @@
       </button>
     </div>
   </div>
+  {% endif %}
 
 </div>
 
 <!-- 引導搜尋 Modal -->
+{% if not request.session.task_active %}
 <div id="guided-modal" class="hidden fixed inset-0 z-[9500] flex items-center justify-center p-4">
   <div class="absolute inset-0 bg-black/40" onclick="closeGuidedModal()"></div>
   <div class="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-white border border-line rounded-xl shadow-xl overflow-hidden">
@@ -223,9 +226,11 @@
     </div>
   </div>
 </div>
+{% endif %}
 
 {% endblock %}
 {% block extra_js %}
+  {% if not request.session.task_active %}
   <script src="{% static 'js/guided_search.js' %}"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -234,4 +239,5 @@
       }
     });
   </script>
+  {% endif %}
 {% endblock %}
