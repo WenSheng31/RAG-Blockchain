@@ -9,6 +9,23 @@
       <p class="mb-2 text-sm">感謝你的參與！你已完成本次所有搜尋任務。</p>
       <p class="m-0 text-sm text-dim">你的操作過程與作答結果已成功記錄，將僅用於學術研究分析。</p>
 
+      {% if correct_count is not None %}
+      <div class="mt-6 grid grid-cols-3 gap-3 text-center">
+        <div class="bg-surface border border-line rounded-xl p-4">
+          <div class="text-2xl font-bold text-ink">{{ correct_count }}<span class="text-base font-normal text-dim"> / {{ total_tasks }}</span></div>
+          <div class="mt-1 text-xs text-dim">答對題數</div>
+        </div>
+        <div class="bg-surface border border-line rounded-xl p-4">
+          <div class="text-2xl font-bold text-ink">{{ accuracy }}<span class="text-base font-normal text-dim">%</span></div>
+          <div class="mt-1 text-xs text-dim">正確率</div>
+        </div>
+        <div class="bg-surface border border-line rounded-xl p-4">
+          <div class="text-2xl font-bold text-ink">{{ time_str }}</div>
+          <div class="mt-1 text-xs text-dim">總花費時間</div>
+        </div>
+      </div>
+      {% endif %}
+
       <hr class="my-6 border-line">
 
       <h5 class="mb-2 text-base font-semibold">研究問卷</h5>

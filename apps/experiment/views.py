@@ -20,10 +20,16 @@ def task_view(request):
         return render(request, "knowledge/task_done.html")
     task = TASKS[idx]
     request.session["task_id"] = task["task_id"]
+
+    feedback = request.session.get("last_answer_feedback")
+    if feedback:
+        del request.session["last_answer_feedback"]
+
     return render(request, "knowledge/task.html", {
         "task": task,
         "task_number": idx + 1,
         "total_tasks": len(TASKS),
+        "feedback": feedback,
     })
 
 
@@ -60,26 +66,41 @@ def finish_task(request, keyword_id):
     except KW.DoesNotExist:
         selected_text = ""
 
+    is_correct = selected_text in task["correct_keywords"]
     session.add_answer({
         "task_id": task["task_id"],
         "selected_keyword_id": keyword_id,
         "selected_keyword": selected_text,
-        "is_correct": selected_text in task["correct_keywords"],
+        "is_correct": is_correct,
         "time_seconds": tot_seconds,
     })
     session.end_task()
     next_idx = session.advance()
 
     if next_idx >= len(TASKS):
-        save_experiment_result(
+        result = save_experiment_result(
             session_key=request.session.session_key,
             answers=session.answers,
             exp_start_str=session.experiment_start_time,
             end_time=end_time,
         )
         session.reset()
-        return render(request, "knowledge/task_done.html")
+        total_sec = int(result.total_time_seconds or 0)
+        minutes, seconds = divmod(total_sec, 60)
+        time_str = f"{minutes} 分 {seconds} 秒" if minutes else f"{seconds} 秒"
+        return render(request, "knowledge/task_done.html", {
+            "correct_count": result.correct_count,
+            "total_tasks": len(TASKS),
+            "accuracy": round(result.accuracy * 100),
+            "time_str": time_str,
+        })
 
+    request.session["last_answer_feedback"] = {
+        "is_correct": is_correct,
+        "selected": selected_text,
+        "correct_keywords": task["correct_keywords"],
+        "task_number": idx + 1,
+    }
     return redirect("task_view")
 
 
