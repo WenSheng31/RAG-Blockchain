@@ -312,9 +312,19 @@
   var LABELS = {
     '/':               '回首頁',
     '/learning-path/': '回新手入口',
-    '/guided-search/': '回引導搜尋',
   };
+  function bindBack(label) {
+    document.getElementById('back-label').textContent = label;
+    document.getElementById('back-btn').addEventListener('click', function (e) {
+      e.preventDefault();
+      history.back();
+    });
+  }
   try {
+    if (new URLSearchParams(window.location.search).get('from') === 'guided') {
+      bindBack('回引導搜尋');
+      return;
+    }
     var ref = document.referrer;
     if (!ref) return;
     var refUrl = new URL(ref);
@@ -324,11 +334,7 @@
     if (!label) {
       label = p.startsWith('/topics/') ? '回分類' : '回上一頁';
     }
-    document.getElementById('back-label').textContent = label;
-    document.getElementById('back-btn').addEventListener('click', function (e) {
-      e.preventDefault();
-      history.back();
-    });
+    bindBack(label);
   } catch (e) {}
 })();
 

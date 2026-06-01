@@ -85,7 +85,7 @@ function fetchResults() {
 
 function handleResultClick(id, keyword, url) {
   logGuidedResultClick(id, keyword);
-  window.location.href = url;
+  window.location.href = url + (url.includes('?') ? '&' : '?') + 'from=guided';
 }
 
 function logGuidedResultClick(id, keyword) {
