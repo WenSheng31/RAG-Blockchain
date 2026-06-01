@@ -4,7 +4,7 @@ TASKS = [
     {
         "task_id": "Q1",
         "description": "1.\t區塊鏈核心定義理解：你剛開始學習「區塊鏈」，聽說它是一種分散式帳本，並具備不可竄改與可追溯的特性。為了確認自己的理解，你希望找到相關資訊來驗證區塊鏈的定義與其核心特徵。",
-        "correct_keywords": ["Distributed Ledger", "Immutability"],  # 可追溯性 尚未匯入資料庫
+        "correct_keywords": ["Distributed Ledger", "Immutability", "Blockchain"],
     },
     {
         "task_id": "Q2",
