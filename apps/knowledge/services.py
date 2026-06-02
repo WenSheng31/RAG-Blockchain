@@ -95,13 +95,34 @@ def get_autocomplete_keywords(q: str):
             | Q(keyword_en__icontains=token)
             | Q(keyword_abbr__icontains=token)
         )
-    return (
+    qs = list(
         Keyword.objects
         .filter(combined)
         .select_related("category__group")
         .distinct()
-        .order_by("keyword")[:20]
     )
+
+    def _score(kw):
+        fields = [
+            kw.keyword.lower(),
+            (kw.keyword_zh or "").lower(),
+            (kw.keyword_en or "").lower(),
+            (kw.keyword_abbr or "").lower(),
+        ]
+        exact_bonus = 0
+        matched_tokens = 0
+        for token in tokens:
+            t = token.lower()
+            for fv in fields:
+                if t in fv:
+                    matched_tokens += 1
+                    if fv == t:
+                        exact_bonus += 1
+                    break
+        return (exact_bonus, matched_tokens, -len(kw.keyword))
+
+    qs.sort(key=_score, reverse=True)
+    return qs[:20]
 
 
 # ── Question / Article ────────────────────────────────────────────────────────
