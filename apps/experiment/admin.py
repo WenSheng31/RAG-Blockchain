@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+from import_export.admin import ExportMixin
 from .models import NavigationLog, TaskSessionResult
 
 
@@ -12,7 +13,7 @@ class NavigationLogAdmin(admin.ModelAdmin):
 
 
 @admin.register(TaskSessionResult)
-class TaskSessionResultAdmin(admin.ModelAdmin):
+class TaskSessionResultAdmin(ExportMixin, admin.ModelAdmin):
     list_display = (
         "session_key",
         "started_at",
