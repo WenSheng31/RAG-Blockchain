@@ -36,21 +36,26 @@
     </section>
 
     <!-- 快速搜尋 -->
-    <section class="bg-white border border-line rounded-xl p-5">
-      <div class="flex items-start gap-4 mb-4">
-        <i data-lucide="search" class="w-4 h-4 shrink-0 mt-1 text-dim"></i>
-        <div>
-          <h2 class="m-0 mb-1 text-base font-semibold">快速搜尋</h2>
-          <p class="m-0 text-sm text-dim">輸入關鍵字前幾個字，系統自動提供相關詞彙建議。</p>
+    <section class="bg-white border border-line rounded-xl p-5 {% if request.session.task_active and 'quick_search' not in allowed_search_modes %}search-mode-locked{% endif %}">
+      <div class="search-mode-locked-content">
+        <div class="flex items-start gap-4 mb-4">
+          <i data-lucide="search" class="w-4 h-4 shrink-0 mt-1 text-dim"></i>
+          <div>
+            <h2 class="m-0 mb-1 text-base font-semibold">快速搜尋</h2>
+            <p class="m-0 text-sm text-dim">輸入關鍵字前幾個字，系統自動提供相關詞彙建議。</p>
+          </div>
         </div>
+        <input type="text"
+               id="keyword-search"
+               class="w-full px-3 py-2 text-sm border border-line rounded-md focus:outline-none focus:border-line-dark transition-colors"
+               placeholder="例如：錢包、共識、NFT、以太坊"
+               autocomplete="off" />
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" />
+        <div id="search-results" class="mt-2 max-h-64 overflow-y-auto rounded-md border border-line"></div>
       </div>
-      <input type="text"
-             id="keyword-search"
-             class="w-full px-3 py-2 text-sm border border-line rounded-md focus:outline-none focus:border-line-dark transition-colors"
-             placeholder="例如：錢包、共識、NFT、以太坊"
-             autocomplete="off" />
-      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" />
-      <div id="search-results" class="mt-2 max-h-64 overflow-y-auto rounded-md border border-line"></div>
+      {% if request.session.task_active and 'quick_search' not in allowed_search_modes %}
+        {% include "knowledge/_search_mode_locked_overlay.html" %}
+      {% endif %}
     </section>
 
     <!-- 引導搜尋入口 -->
@@ -76,28 +81,33 @@
     {% endif %}
 
     <!-- 主題卡片 -->
-    <section class="bg-white border border-line rounded-xl p-5">
-      <div class="flex items-start gap-4 mb-4">
-        <i data-lucide="layout-grid" class="w-4 h-4 shrink-0 mt-1 text-dim"></i>
-        <div>
-          <h2 class="m-0 mb-1 text-base font-semibold">主題分類瀏覽</h2>
-          <p class="m-0 text-sm text-dim">按主題探索所有相關關鍵字。</p>
+    <section class="bg-white border border-line rounded-xl p-5 {% if request.session.task_active and 'topic_browse' not in allowed_search_modes %}search-mode-locked{% endif %}">
+      <div class="search-mode-locked-content">
+        <div class="flex items-start gap-4 mb-4">
+          <i data-lucide="layout-grid" class="w-4 h-4 shrink-0 mt-1 text-dim"></i>
+          <div>
+            <h2 class="m-0 mb-1 text-base font-semibold">主題分類瀏覽</h2>
+            <p class="m-0 text-sm text-dim">按主題探索所有相關關鍵字。</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {% for group in groups %}
+            <div class="bg-surface border border-line rounded-xl p-4 flex flex-col">
+              <div class="flex-1 mb-4">
+                <h5 class="m-0 mb-2 text-base font-semibold leading-snug text-ink">{{ group.name }}</h5>
+                <p class="m-0 text-sm md:text-[15px] leading-6 text-dim text-justify">{{ group.description|linebreaksbr|default:"尚無描述" }}</p>
+              </div>
+              <a href="{% url 'topic_to_keyword_list' group.id %}"
+                 class="px-4 py-2 rounded-md border border-line text-sm flex items-center justify-center gap-1 hover:bg-lift hover:border-line-dark transition-colors">
+                查看關鍵字 <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </a>
+            </div>
+          {% endfor %}
         </div>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {% for group in groups %}
-          <div class="bg-surface border border-line rounded-xl p-4 flex flex-col">
-            <div class="flex-1 mb-4">
-              <h5 class="m-0 mb-2 text-base font-semibold leading-snug text-ink">{{ group.name }}</h5>
-              <p class="m-0 text-sm md:text-[15px] leading-6 text-dim text-justify">{{ group.description|linebreaksbr|default:"尚無描述" }}</p>
-            </div>
-            <a href="{% url 'topic_to_keyword_list' group.id %}"
-               class="px-4 py-2 rounded-md border border-line text-sm flex items-center justify-center gap-1 hover:bg-lift hover:border-line-dark transition-colors">
-              查看關鍵字 <i data-lucide="arrow-right" class="w-4 h-4"></i>
-            </a>
-          </div>
-        {% endfor %}
-      </div>
+      {% if request.session.task_active and 'topic_browse' not in allowed_search_modes %}
+        {% include "knowledge/_search_mode_locked_overlay.html" %}
+      {% endif %}
     </section>
 
   </div>

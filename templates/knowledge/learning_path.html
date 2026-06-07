@@ -15,6 +15,9 @@
 {% block content %}
 <div class="max-w-3xl mx-auto flex flex-col gap-0">
 
+<div class="flex flex-col gap-0 {% if request.session.task_active and 'learning_path' not in allowed_search_modes %}search-mode-locked{% endif %}">
+<div class="search-mode-locked-content flex flex-col gap-0">
+
   <!-- ── 根節點 ──────────────────────────────────────────────────── -->
   <div class="bg-ink text-white rounded-xl p-6 shadow-sm">
     <div class="flex items-center gap-3 mb-3">
@@ -117,6 +120,12 @@
     {% endif %}
 
   {% endfor %}
+
+</div>
+{% if request.session.task_active and 'learning_path' not in allowed_search_modes %}
+  {% include "knowledge/_search_mode_locked_overlay.html" %}
+{% endif %}
+</div>
 
   <!-- 連接線 -->
   <div class="flex justify-center py-1">

@@ -63,6 +63,30 @@
       #sidebar.hidden            { display: none; }
       #search-results:empty      { display: none; }
       svg.lucide                 { display: inline; vertical-align: -0.125em; }
+
+      /* 測驗期間限制搜尋入口時的鎖定樣式 */
+      .search-mode-locked        { position: relative; }
+      .search-mode-locked .search-mode-locked-content {
+        opacity: 0.4;
+        pointer-events: none;
+        user-select: none;
+        filter: blur(0.5px);
+      }
+      .search-mode-locked-overlay {
+        position: absolute; inset: 0; z-index: 10;
+        display: flex; align-items: center; justify-content: center;
+        padding: 1rem;
+      }
+      .search-mode-locked-badge {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        padding: 0.625rem 1rem; border-radius: 0.5rem;
+        border: 1px solid var(--c-border);
+        background-color: var(--c-surface);
+        color: var(--c-text);
+        font-size: 0.8125rem;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+        text-align: center;
+      }
     </style>
     {% block page_head %}{% endblock %}
   </head>
