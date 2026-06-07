@@ -269,18 +269,20 @@
 
   <!-- 浮動選題欄（測驗中） -->
   {% if request.session.task_active %}
-  <div class="fixed bottom-6 inset-x-0 z-[900] flex justify-center pointer-events-none">
-    <div class="pointer-events-auto flex items-center gap-4 px-5 py-3 rounded-2xl
-                bg-white/75 backdrop-blur-md border border-green-200
-                shadow-[0_8px_32px_rgba(0,0,0,0.14)] w-auto max-w-[calc(100%-3rem)]">
-      <span class="shrink-0 w-7 h-7 rounded-full bg-green-100 flex items-center justify-center">
-        <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
-      </span>
-      <p class="m-0 text-sm text-ink whitespace-nowrap">
-        確認「<strong class="font-semibold">{{ keyword.keyword }}</strong>」是本題所需的關鍵詞？
-      </p>
+  <div class="fixed bottom-4 sm:bottom-6 inset-x-0 z-[900] flex justify-center px-3 pointer-events-none">
+    <div class="pointer-events-auto flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 rounded-2xl
+                bg-white/90 sm:bg-white/75 backdrop-blur-md border border-green-200
+                shadow-[0_8px_32px_rgba(0,0,0,0.14)] w-full sm:w-auto sm:max-w-[calc(100%-3rem)]">
+      <div class="flex items-center gap-3 min-w-0">
+        <span class="shrink-0 w-7 h-7 rounded-full bg-green-100 flex items-center justify-center">
+          <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+        </span>
+        <p class="m-0 text-sm text-ink">
+          確認「<strong class="font-semibold">{{ keyword.keyword }}</strong>」是本題所需的關鍵詞？
+        </p>
+      </div>
       <a href="{% url 'finish_task' keyword.id %}"
-         class="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 active:scale-95 transition-all shadow-sm whitespace-nowrap">
+         class="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 active:scale-95 transition-all shadow-sm w-full sm:w-auto">
         <i data-lucide="check" class="w-4 h-4"></i>
         我選這個
       </a>
