@@ -46,13 +46,14 @@ def topic_to_keyword_list(request, group_id):
 
 def keyword_list(request, group_id, category_id):
     group = get_group(group_id)
-    request._nav_page_id = group.id
-    request._nav_page_name = group.name
+    category = get_category(group_id, category_id)
+    request._nav_page_id = category.id
+    request._nav_page_name = f"{group.name} > {category.name}"
     return render(request, "knowledge/keyword_list.html", {
         "group": group,
         "group_title": group.name,
         "categories": get_categories(group_id),
-        "current_category": get_category(group_id, category_id),
+        "current_category": category,
         "keywords": get_keywords(group_id, category_id),
         "total_keyword_count": get_group_keyword_count(group_id),
         "total_article_count": get_group_article_count(group_id),
