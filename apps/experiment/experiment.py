@@ -33,7 +33,7 @@ TASKS = [
     {
         "task_id": "Q4",
         "description": "4.\t私鑰安全的重要性：你在學習區塊鏈的資產管理時，發現每位使用者都擁有一組唯一的「私鑰」，一旦遺失或外洩，鏈上資產將無法復原且可能遭竊。你開始思考：為何私鑰如此關鍵？有哪些常見的洩漏風險與保管方式？因此，你希望透過系統查詢相關內容，以理解「私鑰安全」的重要性及防護策略。",
-        "correct_keywords": ["Private Key Security"],
+        "correct_keywords": ["Private Key Security", "Private Key"],
         "allowed_search_modes": ["quick_search"],
     },
     {
