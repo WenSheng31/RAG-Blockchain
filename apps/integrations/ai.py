@@ -39,9 +39,22 @@ class RAGService:
 
     def retrieve(self, query: str, k: int = 5) -> list[int]:
         vec = self._embedder.encode([query], normalize_embeddings=True).astype("float32")
-        k_actual = min(k, self._index.ntotal)
-        _, I = self._index.search(vec, k_actual)
-        return [int(self._ids[i]) for i in I[0] if i != -1]
+        k_search = self._index.ntotal
+        _, I = self._index.search(vec, k_search)
+
+        seen: set[int] = set()
+        result: list[int] = []
+        for i in I[0]:
+            if i == -1:
+                continue
+            article_id = int(self._ids[i])
+            if article_id in seen:
+                continue
+            seen.add(article_id)
+            result.append(article_id)
+            if len(result) >= k:
+                break
+        return result
 
     def generate(self, keyword: str, contexts: list[str]) -> str:
         context = "\n\n---\n\n".join(contexts)
