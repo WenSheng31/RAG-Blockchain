@@ -44,7 +44,7 @@ from .models import KeywordGroup, KeywordCategory, ArticleGroup, Keyword, Questi
 
 
 @admin.register(KeywordGroup)
-class KeywordGroupAdmin(admin.ModelAdmin):
+class KeywordGroupAdmin(ImportExportModelAdmin):
     list_display = ('id', 'name')
     search_fields = ('name',)
     fields = ('name', 'description')

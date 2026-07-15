@@ -195,6 +195,11 @@ docker compose exec web python manage.py createsuperuser
 
 > 目前 repository 僅提供「原始資料匯出」，尚未包含統計檢定 / 圖表分析腳本；後續可依匯出的 CSV，比較不同 `allowed_search_modes` 下的正確率、花費時間與導航路徑長度差異。
 
+匯出後的 CSV / Excel 檔案存放於 `exports/`，以子資料夾區分資料性質：
+
+- `exports/experiment_logs/`：實驗紀錄（`NavigationLog`、`TaskSessionResult`）
+- `exports/articles/`：知識庫文章資料
+
 ## 專案結構
 
 ```
@@ -203,6 +208,7 @@ apps/
   experiment/      # 使用者任務實驗、導航紀錄、結果匯出
   integrations/    # RAGService：FAISS 檢索 + Gemini 生成
 config/            # Django 專案設定（settings、urls）
+exports/           # 匯出資料存放處（experiment_logs、articles）
 faiss_data/        # FAISS 索引檔（gitbook_faiss.index、gitbook_ids.npy）
 static/js/         # 前端互動腳本（搜尋、引導式搜尋、任務面板等）
 templates/         # HTML 樣板
