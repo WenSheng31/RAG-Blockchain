@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from import_export import fields, resources
-from import_export.admin import ExportMixin
+from import_export.admin import ImportExportModelAdmin
 from .models import NavigationLog, TaskSessionResult
 
 
@@ -47,6 +47,11 @@ class TaskSessionResultResource(resources.ModelResource):
     def dehydrate_navigation_paths(self, obj):
         return _build_navigation_paths_text(obj.session_key)
 
+    def get_instance(self, instance_loader, row):
+        # 匯出檔案沒有主鍵欄位，且不同環境的 id 不會對應到同一筆紀錄，
+        # 因此匯入一律視為新增，避免誤判成更新既有紀錄或找不到 'id' 欄位而出錯。
+        return None
+
 
 @admin.register(NavigationLog)
 class NavigationLogAdmin(admin.ModelAdmin):
@@ -56,7 +61,7 @@ class NavigationLogAdmin(admin.ModelAdmin):
 
 
 @admin.register(TaskSessionResult)
-class TaskSessionResultAdmin(ExportMixin, admin.ModelAdmin):
+class TaskSessionResultAdmin(ImportExportModelAdmin):
     resource_classes = [TaskSessionResultResource]
 
     list_display = (
